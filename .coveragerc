@@ -1,7 +1,7 @@
 [run]
 branch = True
-source = shablona/*
-include = shablona/*
+source = pygeoutil/*
+include = pygeoutil/*
 omit = */setup.py
 [report]
-include = shablona/*
+include = pygeoutil/*

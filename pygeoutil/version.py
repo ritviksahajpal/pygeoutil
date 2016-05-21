@@ -55,9 +55,9 @@ Copyright (c) 2015--, Ariel Rokem, The University of Washington
 eScience Institute.
 """
 
-NAME = "shablona"
-MAINTAINER = "Ariel Rokem"
-MAINTAINER_EMAIL = "arokem@gmail.com"
+NAME = "pygeoutil"
+MAINTAINER = "Ritvik Sahajpal"
+MAINTAINER_EMAIL = "ritvik@umd.edu"
 DESCRIPTION = description
 LONG_DESCRIPTION = long_description
 URL = "http://github.com/uwescience/shablona"
