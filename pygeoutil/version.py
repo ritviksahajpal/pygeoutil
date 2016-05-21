@@ -45,7 +45,7 @@ repository README_.
 
 License
 =======
-``shablona`` is licensed under the terms of the MIT license. See the file
+``pygeoutil`` is licensed under the terms of the MIT license. See the file
 "LICENSE" for information on the history of this software, terms & conditions
 for usage, and a DISCLAIMER OF ALL WARRANTIES.
 
