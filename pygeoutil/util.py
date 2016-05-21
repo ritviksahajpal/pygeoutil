@@ -42,18 +42,6 @@ def make_dir_if_missing(d):
         if exception.errno != errno.EEXIST:
             raise
 
-import constants
-# Logging.
-cur_flname = os.path.splitext(os.path.basename(__file__))[0]
-LOG_FILENAME = constants.log_dir + os.sep + 'Log_' + cur_flname + '.txt'
-make_dir_if_missing(constants.log_dir)
-logging.basicConfig(filename=LOG_FILENAME, level=logging.INFO, filemode='w',
-                    format='%(asctime)s %(levelname)s %(module)s - %(funcName)s: %(message)s',
-                    datefmt="%m-%d %H:%M")  # Logging levels are DEBUG, INFO, WARNING, ERROR, and CRITICAL
-# Output to screen
-logger = logging.getLogger(cur_flname)
-logger.addHandler(logging.StreamHandler(sys.stdout))
-
 
 def iter_loadtxt(filename, delimiter=',', skiprows=0, dtype=float):
     """
@@ -193,7 +181,7 @@ def get_nc_var3d(hndl_nc, var, year, subset_arr=None):
     if not use_subset_arr:
         ndim = subset_arr.ndim
         if ndim != 2:
-            logger.error('Incorrect dimensions of subset array (should be 2): ' + str(ndim))
+            logging.error('Incorrect dimensions of subset array (should be 2): ' + str(ndim))
             sys.exit(0)
 
     try:
@@ -202,12 +190,12 @@ def get_nc_var3d(hndl_nc, var, year, subset_arr=None):
         if not use_subset_arr:
             # Shapes should match for netCDF slice and subset array
             if val.shape != subset_arr.shape:
-                logger.error('Shapes do not match for netCDF slice and subset array')
+                logging.error('Shapes do not match for netCDF slice and subset array')
             else:
                 val = val * subset_arr
     except:
         val = numpy.nan
-        logger.error('Error in getting var ' + var + ' for year ' + str(year) + ' from netcdf ')
+        logging.error('Error in getting var ' + var + ' for year ' + str(year) + ' from netcdf ')
 
     return val
 
@@ -227,7 +215,7 @@ def get_nc_var2d(hndl_nc, var, subset_arr=None):
     if not use_subset_arr:
         ndim = subset_arr.ndim
         if ndim != 2:
-            logger.error('Incorrect dimensions of subset array (should be 2): ' + str(ndim))
+            logging.error('Incorrect dimensions of subset array (should be 2): ' + str(ndim))
             sys.exit(0)
 
     try:
@@ -236,7 +224,7 @@ def get_nc_var2d(hndl_nc, var, subset_arr=None):
         if not use_subset_arr:
             # Shapes should match for netCDF slice and subset array
             if val.shape != subset_arr.shape:
-                logger.error('Shapes do not match for netCDF slice and subset array')
+                logging.error('Shapes do not match for netCDF slice and subset array')
             else:
                 val = val * subset_arr
     except:
@@ -263,17 +251,18 @@ def get_nc_var1d(hndl_nc, var):
     return val
 
 
-def sum_area_nc(path_nc, var_name, year):
+def sum_area_nc(path_nc, var_name, carea, year):
     """
 
     :param path_nc:
     :param var_name:
+    :param carea:
     :param year:
     :return:
     """
     hndl_nc = open_or_die(path_nc)
 
-    return numpy.ma.sum(open_or_die(constants.path_glm_carea) * (get_nc_var3d(hndl_nc, var_name, year)))
+    return numpy.ma.sum(open_or_die(carea) * (get_nc_var3d(hndl_nc, var_name, year)))
 
 
 @memory.cache
@@ -355,8 +344,7 @@ def convert_arr_to_nc(arr, var_name, lat, lon, out_nc_path, tme=''):
 
 
 @memory.cache
-def convert_ascii_nc(asc_data, out_path, skiprows=0, num_lats=constants.NUM_LATS, num_lons=constants.NUM_LONS,
-                     var_name='data', desc='netCDF'):
+def convert_ascii_nc(asc_data, out_path, num_lats, num_lons, skiprows=0, var_name='data', desc='netCDF'):
     """
     Convert input ascii file to netCDF file. Compute shape from ascii file
     Assumes 2D file, no time dimension
@@ -489,17 +477,13 @@ def avg_netcdf(path_nc, var, do_area_wt=False, area_data='', date=-1, tme_name='
         iyr = date - ts[0]
 
     if do_area_wt:
-        # Multiply fraction of grid cell by area
-        ar = open_or_die(constants.path_glm_carea)
-        # Land area: Total - ice/water area
-        ar = ar * (1.0 - get_nc_var2d(constants.path_glm_stat, var=constants.ice_water_frac))
-        max_ar = numpy.ma.max(ar)
+        max_ar = numpy.ma.max(area_data)
 
         if date == -1:
             for yr in iyr:
-                arr_avg.append(numpy.ma.sum(get_nc_var3d(hndl_nc, var=var, year=yr) * ar) / max_ar)
+                arr_avg.append(numpy.ma.sum(get_nc_var3d(hndl_nc, var=var, year=yr) * area_data) / max_ar)
         else:
-            arr_avg.append((get_nc_var3d(hndl_nc, var=var, year=iyr) * ar) / max_ar)
+            arr_avg.append((get_nc_var3d(hndl_nc, var=var, year=iyr) * area_data) / max_ar)
     else:
         if date == -1:
             for yr in iyr:
@@ -527,7 +511,7 @@ def avg_hist_asc(asc_data, bins=[], use_pos_vals=True, subset_asc=None, do_area_
 
     if do_area_wt:
         # Multiply fraction of grid cell by area
-        ar = open_or_die(constants.path_glm_carea)
+        ar = open_or_die(area_data)
         arr_avg = asc_data * ar
     else:
         arr_avg = asc_data
@@ -563,7 +547,7 @@ def avg_hist_netcdf(path_nc, var, bins=[], use_pos_vals=True, subset_asc=None, d
     hndl_nc = open_or_die(path_nc)
 
     return avg_hist_asc(get_nc_var3d(hndl_nc, var=var, year=iyr), bins=bins, subset_asc=subset_asc,
-                        do_area_wt=do_area_wt)
+                        do_area_wt=do_area_wt, area_data=area_data)
 
 
 def sum_netcdf(path_nc, var, do_area_wt=False, arr_area=None, precompute_area=None, date=-1, tme_name='time',
@@ -624,7 +608,7 @@ def max_diff_netcdf(path_nc, var, fill_mask=False, tme_name='time'):
     :param tme_name: Time!
     :return: List of sum values (could be single value if date == -1)
     """
-    logger.info('max_diff_netcdf ' + var)
+    logging.info('max_diff_netcdf ' + var)
     arr_diff = []
     hndl_nc = open_or_die(path_nc)
 
@@ -712,12 +696,6 @@ def downscale_nc(path_nc, var_name, out_nc_name, scale=1.0, area_name='cell_area
     num_lons = len(get_nc_var2d(hndl_nc, var=lon_name))
     # Output netCDF file will have dimensions: (scale *num_lats , scale * num_lons)
 
-    # Compute dimensions of path_nc file based on # rows/cols in ascii file
-    fl_res = constants.NUM_LATS/(num_lats*scale)
-    if fl_res != constants.NUM_LONS/(num_lons*scale):
-        # Incorrect dimensions
-        sys.exit(0)
-
     # Create output netCDF file
     onc = open_or_die(os.path.dirname(path_nc) + os.sep + out_nc_name, 'w')
 
@@ -770,7 +748,9 @@ def downscale_nc(path_nc, var_name, out_nc_name, scale=1.0, area_name='cell_area
     coarse_arr = get_nc_var2d(hndl_nc, var=area_name)
     # Create finer resolution numpy array
     finer_arr = coarse_arr.repeat(scale, 0).repeat(scale, 1)
-    cell_area[:, :] = (finer_arr[:, :] * constants.M2_TO_KM2)/(scale * scale)  # convert from m^2 to km^2 and scale down
+    # cell_area[:, :] = (finer_arr[:, :] * constants.M2_TO_KM2)/(scale * scale)  # convert from m^2 to km^2 and
+    # downscale
+    cell_area[:, :] = (finer_arr[:, :])/(scale * scale)
 
     onc.close()
 
