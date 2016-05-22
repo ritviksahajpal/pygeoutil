@@ -24,8 +24,12 @@ def glm():
 def make_dir_if_missing(d):
     """
     Create directory if not present, else do nothing
-    :param d: Path of directory to create
-    :return: Nothing, side-effect: create directory
+    Args:
+        d: Path of directory to create
+
+    Returns:
+        Nothing, side-effect: create directory
+
     """
     try:
         os.makedirs(d)
@@ -38,6 +42,14 @@ def iter_loadtxt(filename, delimiter=',', skiprows=0, dtype=float):
     """
     Fast version of numpy genfromtxt
     code from here: http://stackoverflow.com/questions/8956832/python-out-of-memory-on-large-csv-file-numpy/8964779#8964779
+    Args:
+        filename:
+        delimiter:
+        skiprows:
+        dtype:
+
+    Returns:
+
     """
     def iter_func():
         with open(filename, 'r') as infile:
@@ -57,22 +69,38 @@ def iter_loadtxt(filename, delimiter=',', skiprows=0, dtype=float):
 def roundup(x, near):
     """
     Round x to nearest number e.g. roundup(76, 5) gives 80
-    :param x: Number to round-up
-    :param near: Number to which roundup to
-    :return: rounded up number
+    Args:
+        x: Number to round-up
+        near: Number to which roundup to
+
+    Returns:
+        rounded up number
+
     """
     return int(math.ceil(x / near)) * near
 
 
 def round_closest(x, base=10):
+    """
+
+    Args:
+        x:
+        base:
+
+    Returns:
+
+    """
     return int(base * round(float(x)/base))
 
 
 def delete_files(list_file_paths):
     """
 
-    :param list_file_paths:
-    :return:
+    Args:
+        list_file_paths:
+
+    Returns:
+
     """
     logging.info('delete_files')
     for fl in list_file_paths:
@@ -88,9 +116,12 @@ def delete_files(list_file_paths):
 def get_ascii_header(path_file, getrows=0):
     """
     http://stackoverflow.com/questions/1767513/read-first-n-lines-of-a-file-in-python
-    :param path_file:
-    :param getrows:
-    :return:
+    Args:
+        path_file:
+        getrows:
+
+    Returns:
+
     """
     from itertools import islice
     with open(path_file) as inp_file:
@@ -102,12 +133,19 @@ def get_ascii_header(path_file, getrows=0):
 def open_or_die(path_file, perm='r', csv_header=True, skiprows=0, delimiter=' ', mask_val=-9999.0, format=''):
     """
     Open file or quit gracefully
-    :param path_file: Path of file to open
-    :param perm: Permissions with which to open file. Default is read-only
-    :param format: Special code for some file openings
-    :return: Handle to file (netCDF), or dataframe (csv) or numpy array
-    """
+    Args:
+        path_file: Path of file to open
+        perm: Permissions with which to open file. Default is read-only
+        csv_header:
+        skiprows:
+        delimiter:
+        mask_val:
+        format: Special code for some file openings
 
+    Returns:
+        Handle to file (netCDF), or dataframe (csv) or numpy array
+
+    """
     try:
         if os.path.splitext(path_file)[1] == '.nc':
             hndl = netCDF4.Dataset(path_file, perm, format='NETCDF4')
@@ -137,9 +175,12 @@ def open_or_die(path_file, perm='r', csv_header=True, skiprows=0, delimiter=' ',
 def get_ascii_plot_parameters(asc, step_length=10.0):
     """
     Get min, max and step value for ascii file
-    :param asc:
-    :param step_length:
-    :return:
+    Args:
+        asc:
+        step_length:
+
+    Returns:
+
     """
     if asc.max() > 0.0:
         max = math.ceil(asc.max())
@@ -159,11 +200,14 @@ def get_ascii_plot_parameters(asc, step_length=10.0):
 def get_nc_var3d(hndl_nc, var, year, subset_arr=None):
     """
     Get value from netcdf for variable var for year
-    :param hndl_nc:
-    :param var:
-    :param year:
-    :param subset_arr:
-    :return:
+    Args:
+        hndl_nc:
+        var:
+        year:
+        subset_arr:
+
+    Returns:
+
     """
     # TODO: Function assumes that subset_arr is boolean i.e. 1 or 0 (if not, errors can happen)
     use_subset_arr = subset_arr is None
@@ -194,10 +238,13 @@ def get_nc_var3d(hndl_nc, var, year, subset_arr=None):
 def get_nc_var2d(hndl_nc, var, subset_arr=None):
     """
     Get value from netcdf for var
-    :param hndl_nc:
-    :param var:
-    :param subset_arr:
-    :return:
+    Args:
+        hndl_nc:
+        var:
+        subset_arr:
+
+    Returns:
+
     """
     # TODO: Function assumes that subset_arr is boolean i.e. 1 or 0 (if not, errors can happen)
     use_subset_arr = subset_arr is None
@@ -228,9 +275,12 @@ def get_nc_var2d(hndl_nc, var, subset_arr=None):
 def get_nc_var1d(hndl_nc, var):
     """
     Get value from netcdf for var
-    :param hndl_nc:
-    :param var:
-    :return:
+    Args:
+        hndl_nc:
+        var:
+
+    Returns:
+
     """
     try:
         val = hndl_nc.variables[var][:]
@@ -508,13 +558,17 @@ def avg_netcdf(path_nc, var, do_area_wt=False, area_data='', date=-1, tme_name='
 def avg_hist_asc(asc_data, bins=[], use_pos_vals=True, subset_asc=None, do_area_wt=False, area_data=''):
     """
     Create a weighted average array, return histogram and bin edge values
-    :param asc_data: ascii data
-    :param bins: Optional parameter: bins for computing histogram
-    :param use_pos_vals: Use +ve values only
-    :param subset_asc:
-    :param do_area_wt:
-    :param area_data:
-    :return: The values of the histogram, bin edges
+    Args:
+        asc_data: ascii data
+        bins: Optional parameter: bins for computing histogram
+        use_pos_vals: Use +ve values only
+        subset_asc:
+        do_area_wt:
+        area_data:
+
+    Returns:
+        The values of the histogram, bin edges
+
     """
     if subset_asc is not None:
         asc_data = np.ma.masked_where(subset_asc > 0.0, asc_data, 0.0)
@@ -540,16 +594,20 @@ def avg_hist_netcdf(path_nc, var, bins=[], use_pos_vals=True, subset_asc=None, d
                     tme_name='time'):
     """
     Create a weighted average array, return histogram and bin edge values
+    Args:
+        path_nc: path to netCDF file
+        var: variable in netCDF file to average
+        bins:
+        use_pos_vals: Use +ve values only
+        subset_asc:
+        do_area_wt:
+        area_data:
+        date: average variable for specific date (year)
+        tme_name: name of time dimension in netCDF file
 
-    :param path_nc: netCDF file URI
-    :param var: variable in netCDF file to average
-    :param use_pos_vals: Use +ve values only
-    :param subset_asc:
-    :param do_area_wt:
-    :param area_data:
-    :param date: average variable for specific date (year)
-    :param tme_name: name of time dimension in netCDF file
-    :return: The values of the histogram, bin edges
+    Returns:
+        The values of the histogram, bin edges
+
     """
     hndl_nc = open_or_die(path_nc)
 
@@ -565,15 +623,19 @@ def sum_netcdf(path_nc, var, do_area_wt=False, arr_area=None, precompute_area=No
                subset_arr=None):
     """
     Sum across netCDF, can also do area based weighted sum
-    :param path_nc: netCDF file
-    :param var: variable in netCDF file to sum
-    :param do_area_wt: Should we multiply grid cell area with fraction of grid cell
-    :param arr_area: Array specifying area of each cell
-    :param precompute_area
-    :param date: Do it for specific date or entire time range (if date == -1)
-    :param tme_name: Time!
-    :param subset_arr: Subset the netCDF based on this 2D array (assuming it has 1's and 0's)
-    :return: List of sum values (could be single value if date == -1)
+    Args:
+        path_nc: path to netCDF file
+        var: variable in netCDF file to sum
+        do_area_wt: Should we multiply grid cell area with fraction of grid cell
+        arr_area: Array specifying area of each cell
+        precompute_area:
+        date: Do it for specific date or entire time range (if date == -1)
+        tme_name:
+        subset_arr: Subset the netCDF based on this 2D array (assuming it has 1's and 0's)
+
+    Returns:
+        List of sum values (could be single value if date == -1)
+
     """
     arr_sum = []
     hndl_nc = open_or_die(path_nc)
@@ -612,11 +674,16 @@ def sum_netcdf(path_nc, var, do_area_wt=False, arr_area=None, precompute_area=No
 
 def max_diff_netcdf(path_nc, var, fill_mask=False, tme_name='time'):
     """
-    :param path_nc: netCDF file
-    :param var: variable in netCDF file to sum
-    :param fill_mask:
-    :param tme_name: Time!
-    :return: List of sum values (could be single value if date == -1)
+
+    Args:
+        path_nc: path to netCDF file
+        var: variable in netCDF file to sum
+        fill_mask:
+        tme_name:
+
+    Returns:
+        List of sum values (could be single value if date == -1)
+
     """
     logging.info('max_diff_netcdf ' + var)
     arr_diff = []
@@ -643,9 +710,12 @@ def max_diff_netcdf(path_nc, var, fill_mask=False, tme_name='time'):
 def avg_np_arr(data, block_size=1):
     """
     COARSENS: Takes data, and averages all positive (only numerical) numbers in blocks
-    :param data: numpy array (2D)
-    :param block_size:
-    :return:
+    Args:
+        data: numpy array (2D)
+        block_size:
+
+    Returns:
+
     """
     dimensions = data.shape
 
@@ -663,9 +733,12 @@ def avg_np_arr(data, block_size=1):
 def upscale_np_arr(data, block_size=2):
     """
     Performs interpolation to up-size or down-size images
-    :param data:
-    :param block_size:
-    :return:
+    Args:
+        data:
+        block_size:
+
+    Returns:
+
     """
     dimensions = data.shape
 
@@ -686,15 +759,18 @@ def downscale_nc(path_nc, var_name, out_nc_name, scale=1.0, area_name='cell_area
                  tme_name='time'):
     """
 
-    :param path_nc:
-    :param var_name:
-    :param out_nc_name:
-    :param scale:
-    :param area_name:
-    :param lat_name:
-    :param lon_name:
-    :param tme_name:
-    :return:
+    Args:
+        path_nc:
+        var_name:
+        out_nc_name:
+        scale:
+        area_name:
+        lat_name:
+        lon_name:
+        tme_name:
+
+    Returns:
+
     """
     # @TODO: Fix ice-water fraction in grid cell area calculations
     hndl_nc = open_or_die(path_nc)
@@ -766,14 +842,17 @@ def downscale_nc(path_nc, var_name, out_nc_name, scale=1.0, area_name='cell_area
 def extract_from_ascii(asc, ulat=90.0, llat=-90.0, llon=-180.0, rlon=180.0, res=1.0, subset_arr=None):
     """
     Extract from ascii, a window defined by ulat (top), llat(bottom), llon(left), rlon(right)
-    :param asc:
-    :param ulat:
-    :param llat:
-    :param llon:
-    :param rlon:
-    :param res:
-    :param subset_arr:
-    :return:
+    Args:
+        asc:
+        ulat:
+        llat:
+        llon:
+        rlon:
+        res:
+        subset_arr:
+
+    Returns:
+
     """
     top_row = (90.0 - ulat)/res
     bottom_row = top_row + abs(llat - ulat)/res
@@ -793,8 +872,11 @@ def extract_from_ascii(asc, ulat=90.0, llat=-90.0, llon=-180.0, rlon=180.0, res=
 def duplicate_columns(frame):
     """
     http://stackoverflow.com/questions/14984119/python-pandas-remove-duplicate-columns
-    :param frame:
-    :return:
+    Args:
+        frame:
+
+    Returns:
+
     """
     groups = frame.columns.to_series().groupby(frame.dtypes).groups
     dups = []
@@ -819,10 +901,13 @@ def duplicate_columns(frame):
 def send_email(to=[], subject='', contents=[]):
     """
 
-    :param to:
-    :param subject:
-    :param contents:
-    :return:
+    Args:
+        to:
+        subject:
+        contents:
+
+    Returns:
+
     """
     import yagmail
 
@@ -838,17 +923,20 @@ def compose_date(years, months=1, days=1, weeks=None, hours=None, minutes=None, 
                  microseconds=None, nanoseconds=None):
     """
     From http://stackoverflow.com/questions/34258892/converting-year-and-day-of-year-into-datetime-index-in-pandas
-    :param years:
-    :param months:
-    :param days:
-    :param weeks:
-    :param hours:
-    :param minutes:
-    :param seconds:
-    :param milliseconds:
-    :param microseconds:
-    :param nanoseconds:
-    :return:
+    Args:
+        years:
+        months:
+        days:
+        weeks:
+        hours:
+        minutes:
+        seconds:
+        milliseconds:
+        microseconds:
+        nanoseconds:
+
+    Returns:
+
     """
     years = np.asarray(years) - 1970
     months = np.asarray(months) - 1
@@ -864,6 +952,11 @@ def compose_date(years, months=1, days=1, weeks=None, hours=None, minutes=None, 
 
 
 def get_month_names():
+    """
+
+    Returns:
+
+    """
     list_mon_names = []
     for i in range(12):
         list_mon_names.append(calendar.month_abbr[i + 1].title())
@@ -875,9 +968,12 @@ def sliding_mean(data_array, window=5):
     """
     This function takes an array of numbers and smoothes them out.
     Smoothing is useful for making plots a little easier to read.
-    :param data_array:
-    :param window:
-    :return:
+    Args:
+        data_array:
+        window:
+
+    Returns:
+
     """
     # Return without change if window size is zero
     if window == 0:
