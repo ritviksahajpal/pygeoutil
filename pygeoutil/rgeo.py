@@ -28,7 +28,7 @@ import rasterio
 # create_rat_uri
 # sieve: http://pktools.nongnu.org/html/pksieve.html
 # composite/mosaic: http://pktools.nongnu.org/html/pkcomposite.html
-# mosaic;
+# mosaic
 
 
 def get_dataset_type(path_ds):
