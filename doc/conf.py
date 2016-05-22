@@ -69,7 +69,6 @@ needs_sphinx = '1.0' # numpydoc requires sphinx >= 1.0
 sys.path.append(os.path.abspath('sphinxext'))
 
 extensions = ['sphinx.ext.autodoc',
-              'sphinx.ext.napoleon',
               'sphinx.ext.doctest',
               'sphinx.ext.intersphinx',
               'sphinx.ext.todo',
