@@ -38,7 +38,8 @@ class Mock(MagicMock):
     def __getattr__(cls, name):
             return Mock()
 
-MOCK_MODULES = ['gdalconst', 'pygeoprocessing', 'gdal', 'shapefile', 'numpy', 'pandas', 'rasterio', 'geopy',
+MOCK_MODULES = ['gdalconst', 'pandas.core.common', 'pygeoprocessing', 'gdal', 'shapefile', 'numpy', 'pandas',
+                'rasterio', 'geopy',
                 'geocoder', 'geopy.geocoders', 'geopy.exc', 'functools32', 'netCDF4', 'skimage.measure',
                 'pandas.core.common', 'scikit-image', 'skimage']
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
