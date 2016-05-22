@@ -244,11 +244,14 @@ def get_nc_var1d(hndl_nc, var):
 def sum_area_nc(path_nc, var_name, carea, year):
     """
 
-    :param path_nc:
-    :param var_name:
-    :param carea:
-    :param year:
-    :return:
+    Args:
+        path_nc:
+        var_name:
+        carea:
+        year:
+
+    Returns:
+
     """
     hndl_nc = open_or_die(path_nc)
 
@@ -258,8 +261,11 @@ def sum_area_nc(path_nc, var_name, carea, year):
 def transitions_to_matrix(flat_matrix):
     """
 
-    :param flat_matrix:
-    :return:
+    Args:
+        flat_matrix:
+
+    Returns:
+
     """
     df_trans = flat_matrix.transpose().reset_index()
 
@@ -285,13 +291,17 @@ def transitions_to_matrix(flat_matrix):
 
 def convert_arr_to_nc(arr, var_name, lat, lon, out_nc_path, tme=''):
     """
-    :param arr: Array to convert to netCDF
-    :param var_name: Name of give the variable
-    :param lat:
-    :param lon:
-    :param out_nc_path: Output path including file name
-    :param tme: Array of time values (can be empty)
-    :return:
+
+    Args:
+        arr: Array to convert to netCDF
+        var_name: Name of give the variable
+        lat:
+        lon:
+        out_nc_path: Output path including file name
+        tme: Array of time values (can be empty)
+
+    Returns:
+
     """
     onc = open_or_die(out_nc_path, 'w')
 
@@ -336,14 +346,18 @@ def convert_ascii_nc(asc_data, out_path, num_lats, num_lons, skiprows=0, var_nam
     """
     Convert input ascii file to netCDF file. Compute shape from ascii file
     Assumes 2D file, no time dimension
-    :param asc_data: Path to ascii file to be converted to NC
-    :param out_path:
-    :param skiprows:
-    :param num_lats:
-    :param num_lons:
-    :param var_name:
-    :param desc: Description of data
-    :return: Path of netCDF file that was created, side-effect: create netCDF file
+    Args:
+        asc_data: Path to ascii file to be converted to NC
+        out_path:
+        num_lats:
+        num_lons:
+        skiprows:
+        var_name:
+        desc: Description of data
+
+    Returns:
+        Path of netCDF file that was created, side-effect: create netCDF file
+
     """
     # Compute dimensions of nc file based on # rows/cols in ascii file
     fl_res = num_lats/asc_data.shape[0]
@@ -382,12 +396,16 @@ def convert_ascii_nc(asc_data, out_path, num_lats, num_lons, skiprows=0, var_nam
 def convert_nc_to_csv(path_nc, var_name='data', csv_out='output', do_time=False, time_var='time'):
     """
     Convert netCDF file to csv. If netCDF has a time dimension, then select last year for output
-    :param path_nc: Path of netCDF file to convert to csv file
-    :param var_name: Variable whose data is to be extracted
-    :param csv_out: Output csv file name
-    :param do_time: Is there a time dimension involved
-    :param time_var: Name of time dimension
-    :return: Nothing. Side-effect: Save csv file
+    Args:
+        path_nc: Path of netCDF file to convert to csv file
+        var_name: Variable whose data is to be extracted
+        csv_out: Output csv file name
+        do_time: Is there a time dimension involved
+        time_var: Name of time dimension
+
+    Returns:
+        Nothing. Side-effect: Save csv file
+
     """
     hndl_nc = open_or_die(path_nc)
 
@@ -406,13 +424,16 @@ def convert_nc_to_csv(path_nc, var_name='data', csv_out='output', do_time=False,
 def subtract_netcdf(left_nc, right_nc, left_var, right_var='', date=-1, tme_name='time'):
     """
     Subtract right_nc from left_nc and return numpy array
-    :param left_nc: netCDF file to subtract from
-    :param right_nc: netCDF file getting subtracted
-    :param left_var: Variable to extract from left_nc
-    :param right_var: Variable to extract from right_nc
-    :param date: Which year to extract (or last year)
-    :param tme_name:
-    :return: numpy array (left_nc - right_nc)
+    Args:
+        left_nc: netCDF file to subtract from
+        right_nc: netCDF file getting subtracted
+        left_var: Variable to extract from left_nc
+        right_var: Variable to extract from right_nc
+        date: Which year to extract (or last year)
+        tme_name:
+
+    Returns:
+        numpy array (left_nc - right_nc)
     """
     hndl_left = open_or_die(left_nc)
     hndl_right = open_or_die(right_nc)
@@ -444,13 +465,17 @@ def subtract_netcdf(left_nc, right_nc, left_var, right_var='', date=-1, tme_name
 def avg_netcdf(path_nc, var, do_area_wt=False, area_data='', date=-1, tme_name='time'):
     """
     Average across netCDF, can also do area based weighted average
-    :param path_nc: path to netCDF file
-    :param var: variable in netCDF file to average
-    :param do_area_wt:
-    :param area_data:
-    :param date: Do it for specific date or entire time range (if date == -1)
-    :param tme_name: Time!
-    :return: List of sum values (could be single value if date == -1)
+    Args:
+        path_nc: path to netCDF file
+        var: variable in netCDF file to average
+        do_area_wt:
+        area_data:
+        date: Do it for specific date or entire time range (if date == -1)
+        tme_name:
+
+    Returns:
+        List of sum values (could be single value if date == -1)
+
     """
     arr_avg = []
     hndl_nc = open_or_die(path_nc)
