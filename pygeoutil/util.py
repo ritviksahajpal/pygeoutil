@@ -6,22 +6,14 @@ import click
 import pdb
 import sys
 
-import numpy
+import numpy as np
+import pandas as pd
 import netCDF4
-import pandas
 from skimage.measure import block_reduce
 from tqdm import tqdm
 
-import warnings
-from tempfile import mkdtemp
-
-with warnings.catch_warnings():
-    warnings.filterwarnings("ignore", category=UserWarning)
-    from joblib import Memory
-    memory = Memory(cachedir=mkdtemp(), verbose=0)
-
 # Ignore divide by 0 errors
-numpy.seterr(divide='ignore', invalid='ignore')
+np.seterr(divide='ignore', invalid='ignore')
 
 
 @click.group()
@@ -57,7 +49,7 @@ def iter_loadtxt(filename, delimiter=',', skiprows=0, dtype=float):
                     yield dtype(item)
         iter_loadtxt.rowlength = len(line)
 
-    data = numpy.fromiter(iter_func(), dtype=dtype)
+    data = np.fromiter(iter_func(), dtype=dtype)
     data = data.reshape((-1, iter_loadtxt.rowlength))
     return data
 
@@ -121,18 +113,18 @@ def open_or_die(path_file, perm='r', csv_header=True, skiprows=0, delimiter=' ',
             hndl = netCDF4.Dataset(path_file, perm, format='NETCDF4')
             return hndl
         elif os.path.splitext(path_file)[1] == '.csv':
-            df = pandas.read_csv(path_file, header=csv_header)
+            df = pd.read_csv(path_file, header=csv_header)
             return df
         elif os.path.splitext(path_file)[1] == '.xlsx' or os.path.splitext(path_file)[1] == '.xls':
-            df = pandas.ExcelFile(path_file, header=csv_header)
+            df = pd.ExcelFile(path_file, header=csv_header)
             return df
         elif os.path.splitext(path_file)[1] == '.asc':
             data = iter_loadtxt(path_file, delimiter=delimiter, skiprows=skiprows)
-            data = numpy.ma.masked_values(data, mask_val)
+            data = np.ma.masked_values(data, mask_val)
             return data
         elif os.path.splitext(path_file)[1] == '.txt':
             data = iter_loadtxt(path_file, delimiter=delimiter, skiprows=skiprows)
-            data = numpy.ma.masked_values(data, mask_val)
+            data = np.ma.masked_values(data, mask_val)
             return data
         else:
             logging.error('Invalid file type ' + os.path.splitext(path_file)[1])
@@ -193,7 +185,7 @@ def get_nc_var3d(hndl_nc, var, year, subset_arr=None):
             else:
                 val = val * subset_arr
     except:
-        val = numpy.nan
+        val = np.nan
         logging.error('Error in getting var ' + var + ' for year ' + str(year) + ' from netcdf ')
 
     return val
@@ -227,13 +219,12 @@ def get_nc_var2d(hndl_nc, var, subset_arr=None):
             else:
                 val = val * subset_arr
     except:
-        val = numpy.nan
+        val = np.nan
         logging.info('Error in getting var ' + var + ' from netcdf ')
 
     return val
 
 
-@memory.cache
 def get_nc_var1d(hndl_nc, var):
     """
     Get value from netcdf for var
@@ -244,7 +235,7 @@ def get_nc_var1d(hndl_nc, var):
     try:
         val = hndl_nc.variables[var][:]
     except:
-        val = numpy.nan
+        val = np.nan
         logging.info('Error in getting var ' + var + ' from netcdf ')
 
     return val
@@ -261,10 +252,9 @@ def sum_area_nc(path_nc, var_name, carea, year):
     """
     hndl_nc = open_or_die(path_nc)
 
-    return numpy.ma.sum(open_or_die(carea) * (get_nc_var3d(hndl_nc, var_name, year)))
+    return np.ma.sum(open_or_die(carea) * (get_nc_var3d(hndl_nc, var_name, year)))
 
 
-@memory.cache
 def transitions_to_matrix(flat_matrix):
     """
 
@@ -306,10 +296,10 @@ def convert_arr_to_nc(arr, var_name, lat, lon, out_nc_path, tme=''):
     onc = open_or_die(out_nc_path, 'w')
 
     # dimensions
-    onc.createDimension('lat', numpy.shape(lat)[0])
-    onc.createDimension('lon', numpy.shape(lon)[0])
+    onc.createDimension('lat', np.shape(lat)[0])
+    onc.createDimension('lon', np.shape(lon)[0])
     if len(tme) > 1:
-        onc.createDimension('time', numpy.shape(tme)[0])
+        onc.createDimension('time', np.shape(tme)[0])
         time = onc.createVariable('time', 'i4', ('time',))
         # Assign time
         time[:] = tme
@@ -330,19 +320,18 @@ def convert_arr_to_nc(arr, var_name, lat, lon, out_nc_path, tme=''):
 
     # Assign data
     if len(tme) > 1:
-        onc_var = onc.createVariable(var_name, 'f4', ('time', 'lat', 'lon',), fill_value=numpy.nan)
+        onc_var = onc.createVariable(var_name, 'f4', ('time', 'lat', 'lon',), fill_value=np.nan)
         # Iterate over all years
-        for j in numpy.arange(tme):
+        for j in np.arange(tme):
             onc_var[j, :, :] = arr[j, :, :]
     else:
         # Only single year data
-        onc_var = onc.createVariable(var_name, 'f4', ('lat', 'lon',), fill_value=numpy.nan)
+        onc_var = onc.createVariable(var_name, 'f4', ('lat', 'lon',), fill_value=np.nan)
         onc_var[:, :] = arr[:, :]
 
     onc.close()
 
 
-@memory.cache
 def convert_ascii_nc(asc_data, out_path, num_lats, num_lons, skiprows=0, var_name='data', desc='netCDF'):
     """
     Convert input ascii file to netCDF file. Compute shape from ascii file
@@ -377,13 +366,13 @@ def convert_ascii_nc(asc_data, out_path, num_lats, num_lons, skiprows=0, var_nam
     # Populate and output nc file
     latitudes = nc_data.createVariable('latitude', 'f4', ('lat',))
     longitudes = nc_data.createVariable('longitude', 'f4', ('lon',))
-    data = nc_data.createVariable(var_name, 'f4', ('lat', 'lon',), fill_value=numpy.nan)
+    data = nc_data.createVariable(var_name, 'f4', ('lat', 'lon',), fill_value=np.nan)
 
     data.units = ''
 
     # set the variables we know first
-    latitudes[:] = numpy.arange(90.0 - fl_res/2.0, -90.0, -fl_res)
-    longitudes[:] = numpy.arange(-180.0 + fl_res/2.0, 180.0,  fl_res)
+    latitudes[:] = np.arange(90.0 - fl_res/2.0, -90.0, -fl_res)
+    longitudes[:] = np.arange(-180.0 + fl_res/2.0, 180.0,  fl_res)
     data[:, :] = asc_data[:, :]
 
     nc_data.close()
@@ -409,12 +398,11 @@ def convert_nc_to_csv(path_nc, var_name='data', csv_out='output', do_time=False,
         nc_data = get_nc_var2d(hndl_nc, var=var_name)
 
     # Save the data
-    numpy.savetxt(csv_out+'.csv', nc_data, delimiter=', ')
+    np.savetxt(csv_out+'.csv', nc_data, delimiter=', ')
 
     hndl_nc.close()
 
 
-@memory.cache
 def subtract_netcdf(left_nc, right_nc, left_var, right_var='', date=-1, tme_name='time'):
     """
     Subtract right_nc from left_nc and return numpy array
@@ -453,7 +441,6 @@ def subtract_netcdf(left_nc, right_nc, left_var, right_var='', date=-1, tme_name
     return diff_data
 
 
-@memory.cache
 def avg_netcdf(path_nc, var, do_area_wt=False, area_data='', date=-1, tme_name='time'):
     """
     Average across netCDF, can also do area based weighted average
@@ -475,17 +462,17 @@ def avg_netcdf(path_nc, var, do_area_wt=False, area_data='', date=-1, tme_name='
         iyr = date - ts[0]
 
     if do_area_wt:
-        max_ar = numpy.ma.max(area_data)
+        max_ar = np.ma.max(area_data)
 
         if date == -1:
             for yr in iyr:
-                arr_avg.append(numpy.ma.sum(get_nc_var3d(hndl_nc, var=var, year=yr) * area_data) / max_ar)
+                arr_avg.append(np.ma.sum(get_nc_var3d(hndl_nc, var=var, year=yr) * area_data) / max_ar)
         else:
             arr_avg.append((get_nc_var3d(hndl_nc, var=var, year=iyr) * area_data) / max_ar)
     else:
         if date == -1:
             for yr in iyr:
-                arr_avg.append(numpy.ma.mean(get_nc_var3d(hndl_nc, var=var, year=yr)))
+                arr_avg.append(np.ma.mean(get_nc_var3d(hndl_nc, var=var, year=yr)))
         else:
             arr_avg.append(get_nc_var3d(hndl_nc, var=var, year=yr))
 
@@ -505,7 +492,7 @@ def avg_hist_asc(asc_data, bins=[], use_pos_vals=True, subset_asc=None, do_area_
     :return: The values of the histogram, bin edges
     """
     if subset_asc is not None:
-        asc_data = numpy.ma.masked_where(subset_asc > 0.0, asc_data, 0.0)
+        asc_data = np.ma.masked_where(subset_asc > 0.0, asc_data, 0.0)
 
     if do_area_wt:
         # Multiply fraction of grid cell by area
@@ -516,12 +503,12 @@ def avg_hist_asc(asc_data, bins=[], use_pos_vals=True, subset_asc=None, do_area_
 
     # Select values > 0.0 since -ve values are coming from non-land areas
     if use_pos_vals:
-        arr_avg = numpy.ma.masked_where(arr_avg >= 0.0, arr_avg, 0.0)
+        arr_avg = np.ma.masked_where(arr_avg >= 0.0, arr_avg, 0.0)
 
     if len(bins):
-        return numpy.histogram(arr_avg, bins=bins)
+        return np.histogram(arr_avg, bins=bins)
     else:
-        return numpy.histogram(arr_avg)
+        return np.histogram(arr_avg)
 
 
 def avg_hist_netcdf(path_nc, var, bins=[], use_pos_vals=True, subset_asc=None, do_area_wt=False, area_data='', date=2015,
@@ -576,28 +563,27 @@ def sum_netcdf(path_nc, var, do_area_wt=False, arr_area=None, precompute_area=No
             sum_secd = get_nc_var3d(hndl_nc, var='secdf', year=yr, subset_arr=subset_arr) + \
                        get_nc_var3d(hndl_nc, var='secdn', year=yr, subset_arr=subset_arr)
             nc_area = sum_secd * arr_area
-            arr_sum.append(numpy.ma.sum(get_nc_var3d(hndl_nc, var=var, year=yr, subset_arr=subset_arr) * nc_area) /
-                           numpy.ma.sum(nc_area))
+            arr_sum.append(np.ma.sum(get_nc_var3d(hndl_nc, var=var, year=yr, subset_arr=subset_arr) * nc_area) /
+                           np.ma.sum(nc_area))
     elif precompute_area == 'primary':
         for yr in tqdm(iyr, desc='sum netcdf', disable=(len(iyr) < 2)):
             sum_prim = get_nc_var3d(hndl_nc, var='primf', year=yr, subset_arr=subset_arr) + \
                        get_nc_var3d(hndl_nc, var='primn', year=yr, subset_arr=subset_arr)
             nc_area = sum_prim * arr_area
-            arr_sum.append(numpy.ma.sum(get_nc_var3d(hndl_nc, var=var, year=yr, subset_arr=subset_arr) * nc_area) /
-                           numpy.ma.sum(nc_area))
+            arr_sum.append(np.ma.sum(get_nc_var3d(hndl_nc, var=var, year=yr, subset_arr=subset_arr) * nc_area) /
+                           np.ma.sum(nc_area))
     else:
         # Multiply fraction of grid cell by area
         if do_area_wt:
             for yr in tqdm(iyr, desc='sum netcdf', disable=(len(iyr) < 2)):
-                arr_sum.append(numpy.ma.sum(get_nc_var3d(hndl_nc, var=var, year=yr, subset_arr=subset_arr) * arr_area))
+                arr_sum.append(np.ma.sum(get_nc_var3d(hndl_nc, var=var, year=yr, subset_arr=subset_arr) * arr_area))
         else:
             for yr in tqdm(iyr, desc='sum netcdf', disable=(len(iyr) < 2)):
-                arr_sum.append(numpy.ma.sum(get_nc_var3d(hndl_nc, var=var, year=yr, subset_arr=subset_arr)))
+                arr_sum.append(np.ma.sum(get_nc_var3d(hndl_nc, var=var, year=yr, subset_arr=subset_arr)))
 
     return arr_sum
 
 
-@memory.cache
 def max_diff_netcdf(path_nc, var, fill_mask=False, tme_name='time'):
     """
     :param path_nc: netCDF file
@@ -617,18 +603,17 @@ def max_diff_netcdf(path_nc, var, fill_mask=False, tme_name='time'):
         if yr == iyr.max():
             break
         if fill_mask:
-            left_yr = numpy.ma.filled(get_nc_var3d(hndl_nc, var=var, year=yr + 1), fill_value=numpy.nan)
-            right_yr = numpy.ma.filled(get_nc_var3d(hndl_nc, var=var, year=yr), fill_value=numpy.nan)
+            left_yr = np.ma.filled(get_nc_var3d(hndl_nc, var=var, year=yr + 1), fill_value=np.nan)
+            right_yr = np.ma.filled(get_nc_var3d(hndl_nc, var=var, year=yr), fill_value=np.nan)
         else:
             left_yr = get_nc_var3d(hndl_nc, var=var, year=yr + 1)
             right_yr = get_nc_var3d(hndl_nc, var=var, year=yr)
-        arr_diff.append(numpy.max(left_yr - right_yr))
+        arr_diff.append(np.max(left_yr - right_yr))
 
     hndl_nc.close()
     return arr_diff
 
 
-@memory.cache
 def avg_np_arr(data, block_size=1):
     """
     COARSENS: Takes data, and averages all positive (only numerical) numbers in blocks
@@ -644,12 +629,11 @@ def avg_np_arr(data, block_size=1):
 
     # Down-sample image by applying function to local blocks.
     # http://scikit-image.org/docs/dev/api/skimage.measure.html#skimage.measure.block_reduce
-    avrgd = block_reduce(data, block_size=(block_size, block_size), func=numpy.ma.mean)
+    avrgd = block_reduce(data, block_size=(block_size, block_size), func=np.ma.mean)
 
     return avrgd
 
 
-@memory.cache
 def upscale_np_arr(data, block_size=2):
     """
     Performs interpolation to up-size or down-size images
@@ -701,7 +685,7 @@ def downscale_nc(path_nc, var_name, out_nc_name, scale=1.0, area_name='cell_area
     onc.createDimension('lat', int(num_lats * scale))
     onc.createDimension('lon', int(num_lons * scale))
     if len(ts) > 1:
-        onc.createDimension('time', numpy.shape(ts)[0])
+        onc.createDimension('time', np.shape(ts)[0])
         time = onc.createVariable('time', 'i4', ('time',))
         # Assign time
         time[:] = ts
@@ -709,7 +693,7 @@ def downscale_nc(path_nc, var_name, out_nc_name, scale=1.0, area_name='cell_area
     # variables
     latitudes = onc.createVariable('lat', 'f4', ('lat',))
     longitudes = onc.createVariable('lon', 'f4', ('lon',))
-    cell_area = onc.createVariable(area_name, 'f4', ('lat', 'lon',), fill_value=numpy.nan)
+    cell_area = onc.createVariable(area_name, 'f4', ('lat', 'lon',), fill_value=np.nan)
 
     # Metadata
     latitudes.units = 'degrees_north'
@@ -719,14 +703,14 @@ def downscale_nc(path_nc, var_name, out_nc_name, scale=1.0, area_name='cell_area
 
     # Assign lats/lons
     # CF conventions - cell boundaries essentially stating that lat/lon are in the center of the grid cell
-    latitudes[:] = numpy.arange(90.0 - fl_res/2.0, -90.0, -fl_res)
-    longitudes[:] = numpy.arange(-180.0 + fl_res/2.0, 180.0,  fl_res)
+    latitudes[:] = np.arange(90.0 - fl_res/2.0, -90.0, -fl_res)
+    longitudes[:] = np.arange(-180.0 + fl_res/2.0, 180.0,  fl_res)
 
     # Assign data
     if len(ts) > 1:
-        onc_var = onc.createVariable(var_name, 'f4', ('time', 'lat', 'lon',), fill_value=numpy.nan)
+        onc_var = onc.createVariable(var_name, 'f4', ('time', 'lat', 'lon',), fill_value=np.nan)
         # Iterate over all years
-        for j in numpy.arange(len(ts)):
+        for j in np.arange(len(ts)):
             # Get data from coarse resolution netCDF
             coarse_arr = get_nc_var3d(hndl_nc, var=var_name, year=j)
             # Create finer resolution numpy array
@@ -734,7 +718,7 @@ def downscale_nc(path_nc, var_name, out_nc_name, scale=1.0, area_name='cell_area
             onc_var[j, :, :] = finer_arr[:, :]
     else:
         # Only single year data
-        onc_var = onc.createVariable(var_name, 'f4', ('lat', 'lon',), fill_value=numpy.nan)
+        onc_var = onc.createVariable(var_name, 'f4', ('lat', 'lon',), fill_value=np.nan)
         # Get data from coarse resolution netCDF
         coarse_arr = get_nc_var2d(hndl_nc, var=var_name)
         # Create finer resolution numpy array
@@ -799,7 +783,7 @@ def duplicate_columns(frame):
             ia = vs.iloc[:, i].values
             for j in range(i+1, lcs):
                 ja = vs.iloc[:, j].values
-                if pandas.core.common.array_equivalent(ia, ja):
+                if pd.core.common.array_equivalent(ia, ja):
                     dups.append(cs[i])
                     break
 
@@ -840,9 +824,9 @@ def compose_date(years, months=1, days=1, weeks=None, hours=None, minutes=None, 
     :param nanoseconds:
     :return:
     """
-    years = numpy.asarray(years) - 1970
-    months = numpy.asarray(months) - 1
-    days = numpy.asarray(days) - 1
+    years = np.asarray(years) - 1970
+    months = np.asarray(months) - 1
+    days = np.asarray(days) - 1
 
     types = ('<M8[Y]', '<m8[M]', '<m8[D]', '<m8[W]', '<m8[h]',
              '<m8[m]', '<m8[s]', '<m8[ms]', '<m8[us]', '<m8[ns]')
@@ -850,7 +834,7 @@ def compose_date(years, months=1, days=1, weeks=None, hours=None, minutes=None, 
     vals = (years, months, days, weeks, hours, minutes, seconds,
             milliseconds, microseconds, nanoseconds)
 
-    return sum(numpy.asarray(v, dtype=t) for t, v in zip(types, vals) if v is not None)
+    return sum(np.asarray(v, dtype=t) for t, v in zip(types, vals) if v is not None)
 
 
 def get_month_names():
@@ -873,7 +857,7 @@ def sliding_mean(data_array, window=5):
     if window == 0:
         return data_array
 
-    data_array = numpy.array(data_array)
+    data_array = np.array(data_array)
     new_list = []
     for i in range(len(data_array)):
         indices = range(max(i - window + 1, 0),
@@ -884,7 +868,7 @@ def sliding_mean(data_array, window=5):
         avg /= float(len(indices))
         new_list.append(avg)
 
-    return numpy.array(new_list)
+    return np.array(new_list)
 
 
 if __name__ == '__main__':
