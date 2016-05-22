@@ -1,7 +1,0 @@
-pandas
-numpy
-geoprocessing
-geopy
-geocoder
-functools32
-rasterio
