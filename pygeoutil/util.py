@@ -825,6 +825,70 @@ def send_email(to=[], subject='', contents=[]):
     except:
         logging.info('Error in sending email')
 
+
+def compose_date(years, months=1, days=1, weeks=None, hours=None, minutes=None, seconds=None, milliseconds=None,
+                 microseconds=None, nanoseconds=None):
+    """
+    From http://stackoverflow.com/questions/34258892/converting-year-and-day-of-year-into-datetime-index-in-pandas
+    :param years:
+    :param months:
+    :param days:
+    :param weeks:
+    :param hours:
+    :param minutes:
+    :param seconds:
+    :param milliseconds:
+    :param microseconds:
+    :param nanoseconds:
+    :return:
+    """
+    years = numpy.asarray(years) - 1970
+    months = numpy.asarray(months) - 1
+    days = numpy.asarray(days) - 1
+
+    types = ('<M8[Y]', '<m8[M]', '<m8[D]', '<m8[W]', '<m8[h]',
+             '<m8[m]', '<m8[s]', '<m8[ms]', '<m8[us]', '<m8[ns]')
+
+    vals = (years, months, days, weeks, hours, minutes, seconds,
+            milliseconds, microseconds, nanoseconds)
+
+    return sum(numpy.asarray(v, dtype=t) for t, v in zip(types, vals) if v is not None)
+
+
+def get_month_names():
+    list_mon_names = []
+    for i in range(12):
+        list_mon_names.append(calendar.month_abbr[i + 1].title())
+
+    return list_mon_names
+
+
+def sliding_mean(data_array, window=5):
+    """
+    This function takes an array of numbers and smoothes them out.
+    Smoothing is useful for making plots a little easier to read.
+    :param data_array:
+    :param window:
+    :return:
+    """
+    # Return without change if window size is zero
+    if window == 0:
+        return data_array
+
+    data_array = numpy.array(data_array)
+    new_list = []
+    for i in range(len(data_array)):
+        indices = range(max(i - window + 1, 0),
+                        min(i + window + 1, len(data_array)))
+        avg = 0
+        for j in indices:
+            avg += data_array[j]
+        avg /= float(len(indices))
+        new_list.append(avg)
+
+    return numpy.array(new_list)
+
+
 if __name__ == '__main__':
     glm()
 
