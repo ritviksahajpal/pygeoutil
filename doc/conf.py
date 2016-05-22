@@ -33,6 +33,7 @@ import buildmodref
 import sys
 from mock import MagicMock
 
+
 class Mock(MagicMock):
     @classmethod
     def __getattr__(cls, name):
