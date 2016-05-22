@@ -86,8 +86,8 @@ def get_properties(path_ds, name_property):
     """
 
     Args:
-        @param path_ds:
-        @param name_property:
+        path_ds:
+        name_property:
 
     Returns:
 
