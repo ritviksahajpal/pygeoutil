@@ -126,6 +126,7 @@ def lookup(path_ds, path_out_ds, from_field='Value', to_field='', overwrite=True
 def convert_raster_to_ascii(path_input_raster, path_ascii_output, overwrite=True):
     """
     Convert input raster to ascii format
+
     :param path_input_raster
     :param path_ascii_output
     :param overwrite:
