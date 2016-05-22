@@ -4,6 +4,7 @@ import gdal
 import glob
 import gdalconst
 import pandas as pd
+import numpy as np
 import sys
 
 from pygeoprocessing import geoprocessing as gp
@@ -254,7 +255,7 @@ def extract_at_point_from_ras(path_ras, lon, lat):
     with rasterio.drivers():
         # Read raster bands directly to numpy arrays
         with rasterio.open(path_ras) as src:
-            return src.sample([(lon, lat)])
+            return np.asarray(src.sample([(lon, lat)]))
 
 
 if __name__ == '__main__':
