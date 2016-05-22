@@ -39,7 +39,7 @@ class Mock(MagicMock):
             return Mock()
 
 MOCK_MODULES = ['gdalconst', 'pygeoprocessing', 'gdal', 'shapefile', 'numpy', 'pandas', 'rasterio', 'geopy',
-                'geocoder', 'geopy.geocoders', 'geopy.exc']
+                'geocoder', 'geopy.geocoders', 'geopy.exc', 'functools32']
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 # autogenerate api documentation
