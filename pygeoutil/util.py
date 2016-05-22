@@ -515,6 +515,7 @@ def avg_hist_netcdf(path_nc, var, bins=[], use_pos_vals=True, subset_asc=None, d
                     tme_name='time'):
     """
     Create a weighted average array, return histogram and bin edge values
+
     :param path_nc: netCDF file URI
     :param var: variable in netCDF file to average
     :param use_pos_vals: Use +ve values only
