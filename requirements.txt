@@ -1,4 +1,4 @@
-gdal
+gdal==1.11.4
 pandas
 numpy
 geoprocessing
