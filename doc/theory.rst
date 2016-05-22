@@ -1,8 +1,8 @@
 
-This is a theory section
-========================
+Introduction to pygeoutil
+=========================
 
-I might want to describe some equations: 
+Pending:
 
 .. math::
 
@@ -12,6 +12,6 @@ I might want to describe some equations:
 And refer to a paper [author2015]_.
 
 
-.. [author2015] first a., second a., cheese b. (2015). The title of their 
+.. [author2015] first a., second a., cheese b. (2015). The title of their
                 paper. Journal of papers, *15*: 1023-1049.
 
