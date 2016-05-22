@@ -1,0 +1,10 @@
+gdal
+gdalconst
+pandas
+numpy
+pygeoprocessing
+geocoder
+geopy
+functools32
+shapefile
+rasterio

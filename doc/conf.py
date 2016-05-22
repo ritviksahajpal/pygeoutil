@@ -61,7 +61,7 @@ sys.path.insert(0, os.path.abspath('../'))
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
-needs_sphinx = '1.0' # numpydoc requires sphinc >= 1.0
+needs_sphinx = '1.0' # numpydoc requires sphinx >= 1.0
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
@@ -69,6 +69,7 @@ needs_sphinx = '1.0' # numpydoc requires sphinc >= 1.0
 sys.path.append(os.path.abspath('sphinxext'))
 
 extensions = ['sphinx.ext.autodoc',
+              'sphinxcontrib.napoleon',
               'sphinx.ext.doctest',
               'sphinx.ext.intersphinx',
               'sphinx.ext.todo',
@@ -77,7 +78,7 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.ifconfig',
               'sphinx.ext.autosummary',
               'sphinx.ext.mathjax',
-              'math_dollar', # has to go before numpydoc
+              'math_dollar',  # has to go before numpydoc
               'numpydoc',
               'github']
 
