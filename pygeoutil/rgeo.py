@@ -245,9 +245,10 @@ def copy_shpfile(path_inp_shp, path_out_shp):
 def extract_at_point_from_ras(path_ras, lon, lat):
     """
     Extract value from raster at given longitude and latitude
+    East and North are positive, West and South are negative
     :param path_ras:
-    :param lon:
-    :param lat:
+    :param lon: 27.8 (E)
+    :param lat: -13.13 (S)
     :return:
     """
     with rasterio.drivers():
