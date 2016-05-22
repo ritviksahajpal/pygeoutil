@@ -390,7 +390,6 @@ def convert_ascii_nc(asc_data, out_path, num_lats, num_lons, skiprows=0, var_nam
     return out_nc
 
 
-@memory.cache
 def convert_nc_to_csv(path_nc, var_name='data', csv_out='output', do_time=False, time_var='time'):
     """
     Convert netCDF file to csv. If netCDF has a time dimension, then select last year for output
