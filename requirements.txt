@@ -1,10 +1,8 @@
-gdal>=1.11
-gdalconst
+gdal
 pandas
 numpy
 pygeoprocessing
 geocoder
 geopy
 functools32
-shapefile
 rasterio
