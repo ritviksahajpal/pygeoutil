@@ -10,7 +10,6 @@ import numpy
 import netCDF4
 import pandas
 from skimage.measure import block_reduce
-from pandas.core.common import array_equivalent
 from tqdm import tqdm
 
 import warnings
@@ -801,7 +800,7 @@ def duplicate_columns(frame):
             ia = vs.iloc[:, i].values
             for j in range(i+1, lcs):
                 ja = vs.iloc[:, j].values
-                if array_equivalent(ia, ja):
+                if pandas.core.common.array_equivalent(ia, ja):
                     dups.append(cs[i])
                     break
 
