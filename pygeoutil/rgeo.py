@@ -13,6 +13,7 @@ from geopy.exc import GeocoderTimedOut
 from shutil import copyfile
 from functools32 import lru_cache
 import shapefile
+import rasterio
 
 # TODO zonal statistics: https://github.com/perrygeo/python-rasterstats
 # resize and resample:  http://data.naturalcapitalproject.org/pygeoprocessing/api/latest/api/geoprocessing.html
@@ -239,6 +240,20 @@ def copy_shpfile(path_inp_shp, path_out_shp):
     for fl in files_to_copy:
         ext = os.path.splitext(fl)[1]
         copyfile(fl, path_out + os.sep + name_new_file + ext)
+
+
+def extract_at_point_from_ras(path_ras, lon, lat):
+    """
+    Extract value from raster at given longitude and latitude
+    :param path_ras:
+    :param lon:
+    :param lat:
+    :return:
+    """
+    with rasterio.drivers():
+        # Read raster bands directly to numpy arrays
+        with rasterio.open(path_ras) as src:
+            return src.sample([(lon, lat)])
 
 
 if __name__ == '__main__':
