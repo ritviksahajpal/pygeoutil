@@ -1,3 +1,4 @@
+libgdal
 gdal==1.11
 pandas
 numpy
