@@ -1,4 +1,4 @@
-gdal
+gdal>=1.11
 gdalconst
 pandas
 numpy
