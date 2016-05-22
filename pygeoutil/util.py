@@ -344,10 +344,15 @@ def convert_arr_to_nc(arr, var_name, lat, lon, out_nc_path, tme=''):
 
     Args:
         arr: Array to convert to netCDF
+
         var_name: Name of give the variable
+
         lat:
+
         lon:
+
         out_nc_path: Output path including file name
+
         tme: Array of time values (can be empty)
 
     Returns:
@@ -398,11 +403,17 @@ def convert_ascii_nc(asc_data, out_path, num_lats, num_lons, skiprows=0, var_nam
     Assumes 2D file, no time dimension
     Args:
         asc_data: Path to ascii file to be converted to NC
+
         out_path:
+
         num_lats:
+
         num_lons:
+
         skiprows:
+
         var_name:
+
         desc: Description of data
 
     Returns:
@@ -448,9 +459,13 @@ def convert_nc_to_csv(path_nc, var_name='data', csv_out='output', do_time=False,
     Convert netCDF file to csv. If netCDF has a time dimension, then select last year for output
     Args:
         path_nc: Path of netCDF file to convert to csv file
+
         var_name: Variable whose data is to be extracted
+
         csv_out: Output csv file name
+
         do_time: Is there a time dimension involved
+
         time_var: Name of time dimension
 
     Returns:
@@ -476,10 +491,15 @@ def subtract_netcdf(left_nc, right_nc, left_var, right_var='', date=-1, tme_name
     Subtract right_nc from left_nc and return numpy array
     Args:
         left_nc: netCDF file to subtract from
+
         right_nc: netCDF file getting subtracted
+
         left_var: Variable to extract from left_nc
+
         right_var: Variable to extract from right_nc
+
         date: Which year to extract (or last year)
+
         tme_name:
 
     Returns:
