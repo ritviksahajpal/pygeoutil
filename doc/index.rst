@@ -3,10 +3,10 @@
 Welcome to pygeoutil's documentation!
 ====================================
 
-`pygeoutil` is a template for a small scientific Python project. 
+`pygeoutil`
 
 To see how to use it, please refer to the `README file 
-<https://github.com/uwescience/pygeoutil/blob/master/README.md>`_ in the Github repository.
+<https://github.com/ritviksahajpal/pygeoutil/blob/master/README.md>`_ in the Github repository.
 
 This is an example of documentation of the software, using sphinx_. 
 
