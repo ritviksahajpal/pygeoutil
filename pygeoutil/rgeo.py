@@ -34,8 +34,11 @@ import rasterio
 def get_dataset_type(path_ds):
     """
     Return dataset type e.g. GeoTiff
-    :param path_ds:
-    :return:
+    Args:
+        path_ds:
+
+    Returns:
+
     """
     dataset = gdal.Open(path_ds, gdalconst.GA_ReadOnly)
     dataset_type = dataset.GetDriver().LongName
@@ -48,8 +51,11 @@ def get_dataset_type(path_ds):
 def get_dataset_datatype(path_ds):
     """
     Return datatype of dataset e.g. GDT_UInt32
-    :param path_ds:
-    :return:
+    Args:
+        path_ds:
+
+    Returns:
+
     """
     dataset = gdal.Open(path_ds, gdalconst.GA_ReadOnly)
 
@@ -79,9 +85,12 @@ def get_dataset_datatype(path_ds):
 def get_properties(path_ds, name_property):
     """
 
-    :param path_ds:
-    :param name_property
-    :return:
+    Args:
+        path_ds:
+        name_property:
+
+    Returns:
+
     """
     dict_properties = gp.get_raster_properties_uri(path_ds)
 
@@ -91,9 +100,12 @@ def get_properties(path_ds, name_property):
 def get_values_rat_column(path_ds, name_col='Value'):
     """
 
-    :param path_ds:
-    :param name_col:
-    :return:
+    Args:
+        path_ds:
+        name_col:
+
+    Returns:
+
     """
     dict_values = gp.get_rat_as_dictionary_uri(path_ds)
 
@@ -105,12 +117,15 @@ def get_values_rat_column(path_ds, name_col='Value'):
 def lookup(path_ds, path_out_ds, from_field='Value', to_field='', overwrite=True):
     """
 
-    :param path_ds:
-    :param path_out_ds:
-    :param from_field:
-    :param to_field:
-    :param overwrite:
-    :return:
+    Args:
+        path_ds:
+        path_out_ds:
+        from_field:
+        to_field:
+        overwrite:
+
+    Returns:
+
     """
     if overwrite and os.path.isfile(path_out_ds):
         os.remove(path_out_ds)
@@ -126,11 +141,13 @@ def lookup(path_ds, path_out_ds, from_field='Value', to_field='', overwrite=True
 def convert_raster_to_ascii(path_input_raster, path_ascii_output, overwrite=True):
     """
     Convert input raster to ascii format
+    Args:
+        path_input_raster:
+        path_ascii_output:
+        overwrite:
 
-    :param path_input_raster
-    :param path_ascii_output
-    :param overwrite:
-    :return:
+    Returns:
+
     """
     if overwrite and os.path.isfile(path_ascii_output):
         os.remove(path_ascii_output)
@@ -154,8 +171,11 @@ def convert_raster_to_ascii(path_input_raster, path_ascii_output, overwrite=True
 def get_latlon_location(loc):
     """
     Get latitude/longitude of location
-    :param loc:
-    :return:
+    Args:
+        loc:
+
+    Returns:
+
     """
     try:
         # Geopy
@@ -176,9 +196,12 @@ def get_latlon_location(loc):
 def get_hemisphere(loc, boundary=0.0):
     """
     Get hemisphere in which a location lies (northern/southern)
-    :param loc: Name of country/region to use to get latitude
-    :param boundary: Latitude above which it is N hemisphere
-    :return:
+    Args:
+        loc: Name of country/region to use to get latitude
+        boundary: Latitude above which it is N hemisphere
+
+    Returns:
+
     """
     lat, _ = get_latlon_location(loc)
 
@@ -192,10 +215,13 @@ def get_hemisphere(loc, boundary=0.0):
 def is_temperate(loc, n_boundary=23.5, s_boundary=-23.5):
     """
 
-    :param loc:
-    :param n_boundary:
-    :param s_boundary:
-    :return:
+    Args:
+        loc:
+        n_boundary:
+        s_boundary:
+
+    Returns:
+
     """
     lat, _ = get_latlon_location(loc)
 
@@ -209,7 +235,11 @@ def is_temperate(loc, n_boundary=23.5, s_boundary=-23.5):
 def get_att_table_shpfile(path_shpfile):
     """
 
-    :param path_shpfile:
+    Args:
+        path_shpfile:
+
+    Returns:
+
     """
     # Read shapefile data into dataframe
     hndl_shp = shapefile.Reader(path_shpfile)
@@ -228,8 +258,12 @@ def get_att_table_shpfile(path_shpfile):
 def copy_shpfile(path_inp_shp, path_out_shp):
     """
 
-    :param path_inp_shp:
-    :param path_out_shp:
+    Args:
+        path_inp_shp:
+        path_out_shp:
+
+    Returns:
+
     """
     files_to_copy = glob.glob(os.path.dirname(path_inp_shp) + os.sep +
                               os.path.splitext(os.path.basename(path_inp_shp))[0] + '*')
@@ -248,10 +282,13 @@ def extract_at_point_from_ras(path_ras, lon, lat):
     """
     Extract value from raster at given longitude and latitude
     East and North are positive, West and South are negative
-    :param path_ras:
-    :param lon: 27.8 (E)
-    :param lat: -13.13 (S)
-    :return:
+    Args:
+        path_ras:
+        lon: 27.8 (E)
+        lat: -13.13 (S)
+
+    Returns:
+
     """
     with rasterio.drivers():
         # Read raster bands directly to numpy arrays
