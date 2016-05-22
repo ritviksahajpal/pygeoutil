@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# shablona documentation build configuration file, created by
+# pygeoutil documentation build configuration file, created by
 # sphinx-quickstart on Tue Apr 14 10:29:06 2015.
 #
 # This file is execfile()d with the current directory set to its
@@ -17,8 +17,8 @@ import sys
 import os
 
 # General information about the project.
-project = 'shablona'
-copyright = '2015, Ariel Rokem'
+project = 'pygeoutil'
+copyright = '2016, Ritvik Sahajpal'
 
 currentdir = os.path.abspath(os.path.dirname(__file__))
 ver_file = os.path.join(currentdir, '..', project, 'version.py')
@@ -211,7 +211,7 @@ html_domain_indices = False
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'shablonadoc'
+htmlhelp_basename = 'pygeoutildoc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -231,8 +231,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'shablona.tex', 'shablona Documentation',
-   'Ariel Rokem', 'manual'),
+  ('index', 'pygeoutil.tex', 'pygeoutil Documentation',
+   'Ritvik Sahajpal', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -261,7 +261,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'shablona', 'shablona Documentation',
+    ('index', 'pygeoutil', 'pygeoutil Documentation',
      ['Ariel Rokem'], 1)
 ]
 
@@ -275,8 +275,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'shablona', 'shablona Documentation',
-   'Ariel Rokem', 'shablona', 'One line description of project.',
+  ('index', 'pygeoutil', 'pygeoutil Documentation',
+   'Ariel Rokem', 'pygeoutil', 'One line description of project.',
    'Miscellaneous'),
 ]
 
