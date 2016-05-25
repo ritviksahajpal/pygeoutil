@@ -127,9 +127,6 @@ def lookup(path_ds, path_out_ds, from_field='Value', to_field='', overwrite=True
     Returns:
 
     """
-    if overwrite and os.path.isfile(path_out_ds):
-        os.remove(path_out_ds)
-
     val_from = get_values_rat_column(path_ds, name_col=from_field)
     val_to = get_values_rat_column(path_ds, name_col=to_field)
 
