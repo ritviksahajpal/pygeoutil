@@ -491,15 +491,10 @@ def subtract_netcdf(left_nc, right_nc, left_var, right_var='', date=-1, tme_name
     Subtract right_nc from left_nc and return numpy array
     Args:
         left_nc: netCDF file to subtract from
-
         right_nc: netCDF file getting subtracted
-
         left_var: Variable to extract from left_nc
-
         right_var: Variable to extract from right_nc
-
         date: Which year to extract (or last year)
-
         tme_name:
 
     Returns:
