@@ -994,6 +994,22 @@ def go_higher_dir_levels(path_to_dir, level=0):
     return up_dir
 
 
+def nan_helper(y):
+    """
+    http://stackoverflow.com/questions/6518811/interpolate-nan-values-in-a-numpy-array
+    Helper to handle indices and logical indices of NaN
+    Args:
+        y: y, 1d numpy array with possible NaNs
+
+    Returns:
+     - nans, logical indices of NaNs
+     - index, a function, with signature indices= index(logical_indices),
+       to convert logical indices of NaNs to 'equivalent' indices
+
+    """
+    return np.isnan(y), lambda z: z.nonzero()[0]
+
+
 def sliding_mean(data_array, window=5):
     """
     This function takes an array of numbers and smoothes them out.
