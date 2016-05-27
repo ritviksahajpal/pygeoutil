@@ -166,11 +166,9 @@ def open_or_die(path_file, perm='r', csv_header=True, skiprows=0, delimiter=' ',
             return data
         else:
             logging.error('Invalid file type ' + os.path.splitext(path_file)[1])
-            print('Invalid file type ' + os.path.splitext(path_file)[1])
             sys.exit(0)
     except:
         logging.error('Error opening file ' + path_file)
-        print('error')
         sys.exit(0)
 
 
