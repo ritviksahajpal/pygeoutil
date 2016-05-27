@@ -979,6 +979,21 @@ def get_month_names():
     return list_mon_names
 
 
+def go_higher_dir_levels(path_to_dir, level=0):
+    """
+    Gien directory path, go up number of levels defined by level
+    :param path_to_dir:
+    :param level:
+    :return:
+    """
+    up_dir = path_to_dir
+
+    for lev in range(level):
+        up_dir = os.path.dirname(path_to_dir)
+
+    return up_dir
+
+
 def sliding_mean(data_array, window=5):
     """
     This function takes an array of numbers and smoothes them out.
