@@ -170,7 +170,7 @@ def open_or_die(path_file, perm='r', csv_header=True, skiprows=0, delimiter=' ',
             sys.exit(0)
     except:
         logging.error('Error opening file ' + path_file)
-        print('error')
+        print('error ' + path_file)
         sys.exit(0)
 
 
