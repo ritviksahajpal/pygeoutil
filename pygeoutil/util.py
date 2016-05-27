@@ -136,7 +136,7 @@ def open_or_die(path_file, perm='r', csv_header=0, skiprows=0, delimiter=' ', ma
     Args:
         path_file: Path of file to open
         perm: Permissions with which to open file. Default is read-only
-        csv_header:
+        csv_header: see http://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_csv.html
         skiprows:
         delimiter:
         mask_val:
