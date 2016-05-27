@@ -130,7 +130,7 @@ def get_ascii_header(path_file, getrows=0):
     return hdr
 
 
-def open_or_die(path_file, perm='r', csv_header=True, skiprows=0, delimiter=' ', mask_val=-9999.0, format=''):
+def open_or_die(path_file, perm='r', csv_header=0, skiprows=0, delimiter=' ', mask_val=-9999.0, format=''):
     """
     Open file or quit gracefully
     Args:
@@ -166,12 +166,9 @@ def open_or_die(path_file, perm='r', csv_header=True, skiprows=0, delimiter=' ',
             return data
         else:
             logging.error('Invalid file type ' + os.path.splitext(path_file)[1])
-            print('Invalid file type ' + os.path.splitext(path_file)[1])
             sys.exit(0)
     except:
         logging.error('Error opening file ' + path_file)
-        print('error ' + path_file + ' ' + os.path.splitext(path_file)[1] + ' ' + str(csv_header))
-        print pd.read_csv(path_file, header=1).head(2)
         sys.exit(0)
 
 
