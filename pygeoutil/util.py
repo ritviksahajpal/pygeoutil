@@ -171,7 +171,7 @@ def open_or_die(path_file, perm='r', csv_header=True, skiprows=0, delimiter=' ',
     except:
         logging.error('Error opening file ' + path_file)
         print('error ' + path_file + ' ' + os.path.splitext(path_file)[1] + ' ' + str(csv_header))
-        print pd.read_csv(path_file, header=csv_header).head(2)
+        print pd.read_csv(path_file, header=0).head(2)
         sys.exit(0)
 
 
