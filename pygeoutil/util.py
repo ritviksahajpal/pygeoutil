@@ -66,18 +66,18 @@ def iter_loadtxt(filename, delimiter=',', skiprows=0, dtype=float):
     return data
 
 
-def roundup(x, near):
+def round_down(x, near):
     """
-    Round x to nearest number e.g. roundup(76, 5) gives 80
+    Round x to nearest number e.g. round_down(79, 5) gives 75
     Args:
-        x: Number to round-up
-        near: Number to which roundup to
+        x: Number to round-down
+        near: Number to which round-down to
 
     Returns:
         rounded up number
 
     """
-    return int(math.ceil(x / near)) * near
+    return int(math.ceil(x // near)) * near
 
 
 def round_closest(x, base=10):
