@@ -80,6 +80,20 @@ def round_down(x, near):
     return int(math.ceil(x // near)) * near
 
 
+def round_up(x, near):
+    """
+    Round x to nearest number e.g. round_up(76, 5) gives 80
+    Args:
+        x: Number to round-up
+        near: Number to which round-up to
+
+    Returns:
+        rounded up number
+
+    """
+    return int(math.ceil(float(x) / float(near))) * near
+
+
 def round_closest(x, base=10):
     """
 
