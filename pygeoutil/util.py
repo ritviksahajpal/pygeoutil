@@ -868,6 +868,59 @@ def downscale_nc(path_nc, var_name, out_nc_name, scale=1.0, area_name='cell_area
     onc.close()
 
 
+def add_nc_vars(path_inp, vars, new_var='tmp'):
+    """
+
+    Args:
+        path_inp:
+        vars:
+        new_var:
+
+    Returns:
+
+    """
+    hndl_inp = utils.open_or_die(path_inp, perm='r+')
+
+    for idx, (name_var, var) in enumerate(hndl_inp.variables.iteritems()):
+        if name_var in vars:
+            out_var = hndl_inp.createVariable(new_var, var.datatype, var.dimensions)
+            out_var.setncatts({k: var.getncattr(k) for k in var.ncattrs()})
+            break
+
+    # Create empty array
+    arr3d = np.zeros_like(hndl_inp.variables[vars[0]])
+    for v in vars:
+        arr3d[:] = hndl_inp.variables[v][:]
+
+    # Assign data to new variable
+    out_var[:] = arr3d[:]
+
+    hndl_inp.close()
+
+
+def modify_nc_att(path_inp, vars, att_to_modify, new_att_value):
+    """
+
+    Args:
+        path_inp:
+        vars:
+        att_to_modify:
+        new_att_value:
+
+    Returns:
+
+    """
+    hndl_inp = utils.open_or_die(path_inp, perm='r+')
+
+    for idx, (name_var, var) in enumerate(hndl_inp.variables.iteritems()):
+        if name_var in vars:
+            for k in var.ncattrs():
+                if k == att_to_modify:
+                    var.setncatts({k: new_att_value})
+
+    hndl_inp.close()
+
+
 def extract_from_ascii(asc, ulat=90.0, llat=-90.0, llon=-180.0, rlon=180.0, res=1.0, subset_arr=None):
     """
     Extract from ascii, a window defined by ulat (top), llat(bottom), llon(left), rlon(right)
