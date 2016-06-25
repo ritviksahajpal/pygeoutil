@@ -879,7 +879,7 @@ def add_nc_vars(path_inp, vars, new_var='tmp'):
     Returns:
 
     """
-    hndl_inp = utils.open_or_die(path_inp, perm='r+')
+    hndl_inp = open_or_die(path_inp, perm='r+')
 
     for idx, (name_var, var) in enumerate(hndl_inp.variables.iteritems()):
         if name_var in vars:
@@ -910,7 +910,7 @@ def modify_nc_att(path_inp, vars, att_to_modify, new_att_value):
     Returns:
 
     """
-    hndl_inp = utils.open_or_die(path_inp, perm='r+')
+    hndl_inp = open_or_die(path_inp, perm='r+')
 
     for idx, (name_var, var) in enumerate(hndl_inp.variables.iteritems()):
         if name_var in vars:
