@@ -868,7 +868,7 @@ def downscale_nc(path_nc, var_name, out_nc_name, scale=1.0, area_name='cell_area
     onc.close()
 
 
-def add_nc_vars(path_inp, vars, new_var='tmp'):
+def add_nc_vars_to_new_var(path_inp, vars, new_var='tmp'):
     """
 
     Args:
@@ -890,7 +890,7 @@ def add_nc_vars(path_inp, vars, new_var='tmp'):
     # Create empty array
     arr3d = np.zeros_like(hndl_inp.variables[vars[0]])
     for v in vars:
-        arr3d[:] = hndl_inp.variables[v][:]
+        arr3d[:] = arr3d[:] + hndl_inp.variables[v][:]
 
     # Assign data to new variable
     out_var[:] = arr3d[:]
