@@ -891,7 +891,6 @@ def add_nc_vars_to_new_var(path_inp, vars, new_var='tmp'):
     arr3d = np.zeros_like(hndl_inp.variables[vars[0]])
     for v in vars:
         arr3d[:] = arr3d[:] + hndl_inp.variables[v][:]
-        print v, arr3d.mean()
 
     # Assign data to new variable
     out_var[:] = arr3d[:]
