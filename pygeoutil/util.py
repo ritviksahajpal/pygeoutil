@@ -936,11 +936,11 @@ def extract_from_ascii(asc, ulat=90.0, llat=-90.0, llon=-180.0, rlon=180.0, res=
     Returns:
 
     """
-    top_row = (90.0 - ulat)/res
-    bottom_row = top_row + abs(llat - ulat)/res
+    top_row = int((90.0 - ulat)/res)
+    bottom_row = int(top_row + abs(llat - ulat)/res)
 
-    left_column = abs(-180.0 - llon)/res
-    right_column = left_column + abs(rlon - llon)/res
+    left_column = int(abs(-180.0 - llon)/res)
+    right_column = int(left_column + abs(rlon - llon)/res)
 
     if subset_arr is None:
         asc_subset = asc[top_row:bottom_row, left_column:right_column]
