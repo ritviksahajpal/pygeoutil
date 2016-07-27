@@ -16,6 +16,7 @@ def combine_plots_into_one(all_val_imgs, path_out, out_fname, imgs_in_row=10.):
 
     """
     width, height = Image.open(all_val_imgs[0]).size
+    png_info = Image.open(all_val_imgs[0]).info
     max_size = max(width, height)
 
     # assuming that all images have same size
@@ -28,4 +29,4 @@ def combine_plots_into_one(all_val_imgs, path_out, out_fname, imgs_in_row=10.):
         im = Image.open(img)
         new_im.paste(im, (x_pos, y_pos))
 
-    new_im.save(path_out + os.sep + out_fname + '.png')
+    new_im.save(path_out + os.sep + out_fname + '.png', **png_info)
