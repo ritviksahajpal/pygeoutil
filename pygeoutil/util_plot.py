@@ -22,8 +22,8 @@ def combine_plots_into_one(all_val_imgs, path_out, out_fname, imgs_in_row=10.):
     new_im = Image.new('RGB', (int(max_size * imgs_in_row), int(max_size * math.ceil(len(all_val_imgs)/imgs_in_row))))
 
     for idx, img in enumerate(all_val_imgs):
-        x_pos = int(width * (idx % imgs_in_row))  # upper left of image
-        y_pos = int(height * (idx / imgs_in_row))  # upper top of image
+        x_pos = int(width * (idx % int(imgs_in_row)))  # upper left of image
+        y_pos = int(height * (idx / int(imgs_in_row)))  # upper top of image
 
         im = Image.open(img)
         new_im.paste(im, (x_pos, y_pos))
