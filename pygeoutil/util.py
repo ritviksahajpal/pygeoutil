@@ -319,7 +319,7 @@ def sum_area_nc(path_nc, var_name, carea, year):
     """
     hndl_nc = open_or_die(path_nc)
 
-    return np.ma.sum(open_or_die(carea) * (get_nc_var3d(hndl_nc, var_name, year)))
+    return np.ma.sum(carea * (get_nc_var3d(hndl_nc, var_name, year)))
 
 
 def transitions_to_matrix(flat_matrix):
