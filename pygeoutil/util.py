@@ -211,6 +211,17 @@ def get_ascii_plot_parameters(asc, step_length=10.0):
     return min, max, step
 
 
+def get_git_revision_hash():
+    """
+
+    Returns:
+
+    """
+    import subprocess
+
+    return subprocess.check_output(['git', 'rev-parse', 'HEAD'])
+
+
 def get_nc_var3d(hndl_nc, var, year, subset_arr=None):
     """
     Get value from netcdf for variable var for year
