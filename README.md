@@ -34,6 +34,8 @@ The project has the following structure:
 * Install pre-requisite packages: gdal, pandas, numpy, pygeoprocessing, geocoder, geopy, functools32, rasterio
 
 * Install using pip
-`pip install git+https://github.com/ritviksahajpal/pygeoutil.git`
+`pip install git+https://github.com/ritviksahajpal/pygeoutil.git`  
+* Upgrade using pip
+`pip install --upgrade git+https://github.com/ritviksahajpal/pygeoutil.git`
 
 
