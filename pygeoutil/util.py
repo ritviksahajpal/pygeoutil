@@ -4,6 +4,7 @@ import os
 import errno
 import click
 import pdb
+import datetime
 import sys
 
 import numpy as np
@@ -1011,6 +1012,21 @@ def send_email(to=[], subject='', contents=[]):
     except:
         logging.info('Error in sending email')
 
+
+def get_modification_date(filename):
+    """
+    http://stackoverflow.com/questions/237079/how-to-get-file-creation-modification-date-times-in-python
+    E.g. print modification_date('/var/log/syslog')
+    >>> 2009-10-06 10:50:01
+    Args:
+        filename:
+
+    Returns:
+
+    """
+    t = os.path.getmtime(filename)
+
+    return datetime.datetime.fromtimestamp(t)
 
 def compose_date(years, months=1, days=1, weeks=None, hours=None, minutes=None, seconds=None, milliseconds=None,
                  microseconds=None, nanoseconds=None):
