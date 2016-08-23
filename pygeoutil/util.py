@@ -370,15 +370,10 @@ def convert_arr_to_nc(arr, var_name, lat, lon, out_nc_path, tme=''):
 
     Args:
         arr: Array to convert to netCDF
-
         var_name: Name of give the variable
-
         lat:
-
         lon:
-
         out_nc_path: Output path including file name
-
         tme: Array of time values (can be empty)
 
     Returns:
@@ -401,9 +396,9 @@ def convert_arr_to_nc(arr, var_name, lat, lon, out_nc_path, tme=''):
 
     # Metadata
     latitudes.units = 'degrees_north'
-    latitudes.standard_name = 'latitude'
+    latitudes.standard_name = 'lat'
     longitudes.units = 'degrees_east'
-    longitudes.standard_name = 'longitude'
+    longitudes.standard_name = 'lon'
 
     # Assign lats/lons
     latitudes[:] = lat
