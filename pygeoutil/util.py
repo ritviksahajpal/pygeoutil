@@ -424,17 +424,11 @@ def convert_ascii_nc(asc_data, out_path, num_lats, num_lons, skiprows=0, var_nam
     Assumes 2D file, no time dimension
     Args:
         asc_data: Path to ascii file to be converted to NC
-
         out_path:
-
         num_lats:
-
         num_lons:
-
         skiprows:
-
         var_name:
-
         desc: Description of data
 
     Returns:
@@ -460,8 +454,8 @@ def convert_ascii_nc(asc_data, out_path, num_lats, num_lons, skiprows=0, var_nam
     nc_data.createDimension('lon', asc_data.shape[1])
 
     # Populate and output nc file
-    latitudes = nc_data.createVariable('latitude', 'f4', ('lat',))
-    longitudes = nc_data.createVariable('longitude', 'f4', ('lon',))
+    latitudes = nc_data.createVariable('lat', 'f4', ('lat',))
+    longitudes = nc_data.createVariable('lon', 'f4', ('lon',))
     data = nc_data.createVariable(var_name, 'f4', ('lat', 'lon',), fill_value=np.nan)
 
     data.units = ''
