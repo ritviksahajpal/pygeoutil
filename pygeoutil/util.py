@@ -649,8 +649,7 @@ def avg_hist_netcdf(path_nc, var, bins=[], use_pos_vals=True, subset_asc=None, d
                         do_area_wt=do_area_wt, area_data=area_data)
 
 
-def sum_netcdf(path_nc, var, do_area_wt=False, arr_area=None, precompute_area=None, date=-1, tme_name='time',
-               subset_arr=None):
+def sum_netcdf(path_nc, var, do_area_wt=False, arr_area=None, date=-1, tme_name='time', subset_arr=None):
     """
     Sum across netCDF, can also do area based weighted sum
     Args:
@@ -658,7 +657,6 @@ def sum_netcdf(path_nc, var, do_area_wt=False, arr_area=None, precompute_area=No
         var: variable in netCDF file to sum
         do_area_wt: Should we multiply grid cell area with fraction of grid cell
         arr_area: Array specifying area of each cell
-        precompute_area:
         date: Do it for specific date or entire time range (if date == -1)
         tme_name:
         subset_arr: Subset the netCDF based on this 2D array (assuming it has 1's and 0's)
@@ -671,33 +669,16 @@ def sum_netcdf(path_nc, var, do_area_wt=False, arr_area=None, precompute_area=No
     hndl_nc = open_or_die(path_nc)
 
     ts = get_nc_var1d(hndl_nc, var=tme_name)  # time-series
-    if date == -1:  # Plot either the last year {len(ts)-1} or whatever year the user wants
-        iyr = ts - ts[0]
-    else:
-        iyr = [date - ts[0]]
 
-    if precompute_area == 'secondary':
-        for yr in tqdm(iyr, desc='sum netcdf', disable=(len(iyr) < 2)):
-            sum_secd = get_nc_var3d(hndl_nc, var='secdf', year=yr, subset_arr=subset_arr) + \
-                       get_nc_var3d(hndl_nc, var='secdn', year=yr, subset_arr=subset_arr)
-            nc_area = sum_secd * arr_area
-            arr_sum.append(np.ma.sum(get_nc_var3d(hndl_nc, var=var, year=yr, subset_arr=subset_arr) * nc_area) /
-                           np.ma.sum(nc_area))
-    elif precompute_area == 'primary':
-        for yr in tqdm(iyr, desc='sum netcdf', disable=(len(iyr) < 2)):
-            sum_prim = get_nc_var3d(hndl_nc, var='primf', year=yr, subset_arr=subset_arr) + \
-                       get_nc_var3d(hndl_nc, var='primn', year=yr, subset_arr=subset_arr)
-            nc_area = sum_prim * arr_area
-            arr_sum.append(np.ma.sum(get_nc_var3d(hndl_nc, var=var, year=yr, subset_arr=subset_arr) * nc_area) /
-                           np.ma.sum(nc_area))
-    else:
-        # Multiply fraction of grid cell by area
+    # Plot either the last year {len(ts)-1} or whatever year the user wants
+    iyr = ts - ts[0] if date == -1 else [date - ts[0]]
+
+    # Multiply fraction of grid cell by area
+    for yr in tqdm(iyr, desc='sum netcdf', disable=(len(iyr) < 2)):
         if do_area_wt:
-            for yr in tqdm(iyr, desc='sum netcdf', disable=(len(iyr) < 2)):
-                arr_sum.append(np.ma.sum(get_nc_var3d(hndl_nc, var=var, year=yr, subset_arr=subset_arr) * arr_area))
+            arr_sum.append(np.ma.sum(get_nc_var3d(hndl_nc, var=var, year=yr, subset_arr=subset_arr) * arr_area))
         else:
-            for yr in tqdm(iyr, desc='sum netcdf', disable=(len(iyr) < 2)):
-                arr_sum.append(np.ma.sum(get_nc_var3d(hndl_nc, var=var, year=yr, subset_arr=subset_arr)))
+            arr_sum.append(np.ma.sum(get_nc_var3d(hndl_nc, var=var, year=yr, subset_arr=subset_arr)))
 
     return arr_sum
 
@@ -740,6 +721,7 @@ def max_diff_netcdf(path_nc, var, fill_mask=False, tme_name='time'):
 def avg_np_arr(data, block_size=1):
     """
     COARSENS: Takes data, and averages all positive (only numerical) numbers in blocks
+    E.g. with a block_size of 2, convert (720 x 1440) array into (360 x 720)
     Args:
         data: numpy array (2D)
         block_size:
