@@ -605,8 +605,7 @@ def avg_hist_asc(asc_data, bins=[], use_pos_vals=True, subset_asc=None, do_area_
 
     if do_area_wt:
         # Multiply fraction of grid cell by area
-        ar = open_or_die(area_data)
-        arr_avg = asc_data * ar
+        arr_avg = asc_data * area_data
     else:
         arr_avg = asc_data
 
