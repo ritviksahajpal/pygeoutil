@@ -2,7 +2,6 @@ import logging
 import math
 import os
 import errno
-import click
 import pdb
 import datetime
 import sys
@@ -17,9 +16,390 @@ from tqdm import tqdm
 np.seterr(divide='ignore', invalid='ignore')
 
 
-@click.group()
-def glm():
-    pass
+######################
+# Miscellaneous
+######################
+def transitions_to_matrix(flat_matrix):
+    """
+
+    Args:
+        flat_matrix:
+
+    Returns:
+
+    """
+    df_trans = flat_matrix.transpose().reset_index()
+
+    # Determine row and column names
+    df_trans['col_name'] = df_trans['index'].str.split('_to_').map(lambda x: x[1])
+    df_trans['row_name'] = df_trans['index'].str.split('_to_').map(lambda x: x[0])
+
+    # Delete duplicate rows which might exist if CFTs are not tracked
+    # In that case c3ann_to_urban and c4ann_to_urban will both be cropland_to_urban
+    df_trans.drop_duplicates(inplace=True)
+    # Create matrix
+    df_trans = df_trans.pivot(index='row_name', columns='col_name', values=0)
+
+    # Drop names
+    df_trans.index.name = None
+    df_trans.columns.name = None
+
+    # Fill Nan's by 0
+    df_trans.fillna(0, inplace=True)
+
+    return df_trans
+
+
+def duplicate_columns(frame):
+    """
+    http://stackoverflow.com/questions/14984119/python-pandas-remove-duplicate-columns
+    Args:
+        frame:
+
+    Returns:
+
+    """
+    groups = frame.columns.to_series().groupby(frame.dtypes).groups
+    dups = []
+
+    for t, v in groups.items():
+
+        cs = frame[v].columns
+        vs = frame[v]
+        lcs = len(cs)
+
+        for i in range(lcs):
+            ia = vs.iloc[:, i].values
+            for j in range(i+1, lcs):
+                ja = vs.iloc[:, j].values
+                if pd.core.common.array_equivalent(ia, ja):
+                    dups.append(cs[i])
+                    break
+
+    return dups
+
+
+def get_git_revision_hash():
+    """
+
+    Returns:
+
+    """
+    import subprocess
+
+    return subprocess.check_output(['git', 'rev-parse', 'HEAD'])
+
+
+def send_email(to=[], subject='', contents=[]):
+    """
+
+    Args:
+        to:
+        subject:
+        contents:
+
+    Returns:
+
+    """
+    import yagmail
+
+    try:
+        yag = yagmail.SMTP('sahajpal.ritvik@gmail.com')
+        yag.send(to=to, subject=subject, contents=contents)
+        yag.close()
+    except:
+        logging.info('Error in sending email')
+
+
+def compose_date(years, months=1, days=1, weeks=None, hours=None, minutes=None, seconds=None, milliseconds=None,
+                 microseconds=None, nanoseconds=None):
+    """
+    From http://stackoverflow.com/questions/34258892/converting-year-and-day-of-year-into-datetime-index-in-pandas
+    Args:
+        years:
+        months:
+        days:
+        weeks:
+        hours:
+        minutes:
+        seconds:
+        milliseconds:
+        microseconds:
+        nanoseconds:
+
+    Returns:
+
+    """
+    years = np.asarray(years) - 1970
+    months = np.asarray(months) - 1
+    days = np.asarray(days) - 1
+
+    types = ('<M8[Y]', '<m8[M]', '<m8[D]', '<m8[W]', '<m8[h]',
+             '<m8[m]', '<m8[s]', '<m8[ms]', '<m8[us]', '<m8[ns]')
+
+    vals = (years, months, days, weeks, hours, minutes, seconds,
+            milliseconds, microseconds, nanoseconds)
+
+    return sum(np.asarray(v, dtype=t) for t, v in zip(types, vals) if v is not None)
+
+
+def get_month_names():
+    """
+
+    Returns:
+
+    """
+    list_mon_names = []
+    for i in range(12):
+        list_mon_names.append(calendar.month_abbr[i + 1].title())
+
+    return list_mon_names
+
+
+def nan_helper(y):
+    """
+    http://stackoverflow.com/questions/6518811/interpolate-nan-values-in-a-numpy-array
+    Helper to handle indices and logical indices of NaN
+    Args:
+        y: y, 1d numpy array with possible NaNs
+
+    Returns:
+     - nans, logical indices of NaNs
+     - index, a function, with signature indices= index(logical_indices),
+       to convert logical indices of NaNs to 'equivalent' indices
+
+    """
+    return np.isnan(y), lambda z: z.nonzero()[0]
+
+
+def sliding_mean(data_array, window=5):
+    """
+    This function takes an array of numbers and smoothes them out.
+    Smoothing is useful for making plots a little easier to read.
+    Args:
+        data_array:
+        window:
+
+    Returns:
+
+    """
+    # Return without change if window size is zero
+    if window == 0:
+        return data_array
+
+    data_array = np.array(data_array)
+    new_list = []
+    for i in range(len(data_array)):
+        indices = range(max(i - window + 1, 0),
+                        min(i + window + 1, len(data_array)))
+        avg = 0
+        for j in indices:
+            avg += data_array[j]
+        avg /= float(len(indices))
+        new_list.append(avg)
+
+    return np.array(new_list)
+
+
+######################
+# numpy array ops
+######################
+def avg_np_arr(data, block_size=1):
+    """
+    COARSENS: Takes data, and averages all positive (only numerical) numbers in blocks
+    E.g. with a block_size of 2, convert (720 x 1440) array into (360 x 720)
+    Args:
+        data: numpy array (2D)
+        block_size:
+
+    Returns:
+
+    """
+    dimensions = data.shape
+
+    if len(dimensions) > 2:
+        logging.info("Error: Cannot handle greater than 2D numpy array")
+        sys.exit(0)
+
+    # Down-sample image by applying function to local blocks.
+    # http://scikit-image.org/docs/dev/api/skimage.measure.html#skimage.measure.block_reduce
+    avrgd = block_reduce(data, block_size=(block_size, block_size), func=np.ma.mean)
+
+    return avrgd
+
+
+def upscale_np_arr(data, block_size=2):
+    """
+    Performs interpolation to up-size or down-size images
+    Args:
+        data:
+        block_size:
+
+    Returns:
+
+    """
+    dimensions = data.shape
+
+    if len(dimensions) > 2:
+        logging.info("Error: Cannot handle greater than 2D numpy array")
+        sys.exit(0)
+
+    # http://scikit-image.org/docs/dev/api/skimage.transform.html#skimage.transform.resize
+    from skimage.transform import resize
+    # Divide data by block_size ^ 2 so that data values are right
+    avrgd = resize(data/(block_size*block_size),
+                   output_shape=(dimensions[0]*block_size, dimensions[1]*block_size))
+
+    return avrgd
+
+
+######################
+# Ascii files
+######################
+def get_ascii_header(path_file, getrows=0):
+    """
+    http://stackoverflow.com/questions/1767513/read-first-n-lines-of-a-file-in-python
+    Args:
+        path_file:
+        getrows:
+
+    Returns:
+
+    """
+    from itertools import islice
+    with open(path_file) as inp_file:
+        hdr = list(islice(inp_file, getrows))
+
+    return hdr
+
+
+def extract_from_ascii(asc, ulat=90.0, llat=-90.0, llon=-180.0, rlon=180.0, res=1.0, subset_arr=None):
+    """
+    Extract from ascii, a window defined by ulat (top), llat(bottom), llon(left), rlon(right)
+    Args:
+        asc:
+        ulat:
+        llat:
+        llon:
+        rlon:
+        res:
+        subset_arr:
+
+    Returns:
+
+    """
+    top_row = int((90.0 - ulat)/res)
+    bottom_row = int(top_row + abs(llat - ulat)/res)
+
+    left_column = int(abs(-180.0 - llon)/res)
+    right_column = int(left_column + abs(rlon - llon)/res)
+
+    if subset_arr is None:
+        asc_subset = asc[top_row:bottom_row, left_column:right_column]
+    else:
+        asc_subset = asc[top_row:bottom_row, left_column:right_column] * \
+                     subset_arr[top_row:bottom_row, left_column:right_column]
+
+    return asc_subset
+
+
+def avg_hist_asc(asc_data, bins=[], use_pos_vals=True, subset_asc=None, do_area_wt=False, area_data=''):
+    """
+    Create a weighted average array, return histogram and bin edge values
+    Args:
+        asc_data: ascii data
+        bins: Optional parameter: bins for computing histogram
+        use_pos_vals: Use +ve values only
+        subset_asc:
+        do_area_wt:
+        area_data:
+
+    Returns:
+        The values of the histogram, bin edges
+
+    """
+    if subset_asc is not None:
+        asc_data = np.ma.masked_where(subset_asc > 0.0, asc_data, 0.0)
+
+    if do_area_wt:
+        # Multiply fraction of grid cell by area
+        ar = open_or_die(area_data)
+        arr_avg = asc_data * ar
+    else:
+        arr_avg = asc_data
+
+    # Select values > 0.0 since -ve values are coming from non-land areas
+    if use_pos_vals:
+        arr_avg = np.ma.masked_where(arr_avg >= 0.0, arr_avg, 0.0)
+
+    if len(bins):
+        return np.histogram(arr_avg, bins=bins)
+    else:
+        return np.histogram(arr_avg)
+
+
+def write_ascii(arr, path_out, name_fl, ncols, nrows, cell_size, xllcorner=-180, yllcorner=-90, nodata_val=-9999):
+    """
+    Output numpy array (arr) to ascii file
+    Args:
+        arr:
+        path_out:
+        name_fl:
+        ncols:
+        nrows:
+        cell_size:
+        xllcorner:
+        yllcorner:
+        nodata_val:
+
+    Returns:
+
+    """
+    asc_file = open(path_out + os.sep + name_fl, 'w+')
+
+    asc_file.write('ncols         %s\n' % ncols)
+    asc_file.write('nrows         %s\n' % nrows)
+    asc_file.write('xllcorner     %s\n' % xllcorner)
+    asc_file.write('yllcorner     %s\n' % yllcorner)
+    asc_file.write('cellsize      %s\n' % cell_size)
+    asc_file.write('NODATA_value  %s\n' % nodata_val)
+
+    np.savetxt(asc_file, arr, fmt='%.6f', delimiter=' ')
+    asc_file.close()
+
+
+######################
+# Managing file system
+######################
+def get_modification_date(filename):
+    """
+    http://stackoverflow.com/questions/237079/how-to-get-file-creation-modification-date-times-in-python
+    E.g. print modification_date('/var/log/syslog')
+    >>> 2009-10-06 10:50:01
+    Args:
+        filename:
+
+    Returns:
+
+    """
+    t = os.path.getmtime(filename)
+
+    return datetime.datetime.fromtimestamp(t)
+
+
+def go_higher_dir_levels(path_to_dir, level=0):
+    """
+    Gien directory path, go up number of levels defined by level
+    :param path_to_dir:
+    :param level:
+    :return:
+    """
+    up_dir = path_to_dir
+
+    for lev in range(level):
+        up_dir = os.path.dirname(path_to_dir)
+
+    return up_dir
 
 
 def make_dir_if_missing(d):
@@ -39,34 +419,29 @@ def make_dir_if_missing(d):
             raise
 
 
-def iter_loadtxt(filename, delimiter=',', skiprows=0, dtype=float):
+def delete_files(list_file_paths):
     """
-    Fast version of numpy genfromtxt
-    code from here: http://stackoverflow.com/questions/8956832/python-out-of-memory-on-large-csv-file-numpy/8964779#8964779
+
     Args:
-        filename:
-        delimiter:
-        skiprows:
-        dtype:
+        list_file_paths:
 
     Returns:
 
     """
-    def iter_func():
-        with open(filename, 'r') as infile:
-            for _ in range(skiprows):
-                next(infile)
-            for line in infile:
-                line = line.lstrip().rstrip().split(delimiter)
-                for item in line:
-                    yield dtype(item)
-        iter_loadtxt.rowlength = len(line)
-
-    data = np.fromiter(iter_func(), dtype=dtype)
-    data = data.reshape((-1, iter_loadtxt.rowlength))
-    return data
+    logging.info('delete_files')
+    for fl in list_file_paths:
+        if os.path.isfile(fl):
+            try:
+                os.remove(fl)
+            except:
+                logging.info('Not able to delete ' + fl)
+        else:
+            logging.info('Already deleted ' + fl)
 
 
+######################
+# Mathematical ops
+######################
 def round_down(x, near):
     """
     Round x to nearest number e.g. round_down(79, 5) gives 75
@@ -108,41 +483,35 @@ def round_closest(x, base=10):
     return int(base * round(float(x)/base))
 
 
-def delete_files(list_file_paths):
+######################
+# File handling
+######################
+def iter_loadtxt(filename, delimiter=',', skiprows=0, dtype=float):
     """
-
+    Fast version of numpy genfromtxt
+    code from here: http://stackoverflow.com/questions/8956832/python-out-of-memory-on-large-csv-file-numpy/8964779#8964779
     Args:
-        list_file_paths:
+        filename:
+        delimiter:
+        skiprows:
+        dtype:
 
     Returns:
 
     """
-    logging.info('delete_files')
-    for fl in list_file_paths:
-        if os.path.isfile(fl):
-            try:
-                os.remove(fl)
-            except:
-                logging.info('Not able to delete ' + fl)
-        else:
-            logging.info('Already deleted ' + fl)
+    def iter_func():
+        with open(filename, 'r') as infile:
+            for _ in range(skiprows):
+                next(infile)
+            for line in infile:
+                line = line.lstrip().rstrip().split(delimiter)
+                for item in line:
+                    yield dtype(item)
+        iter_loadtxt.rowlength = len(line)
 
-
-def get_ascii_header(path_file, getrows=0):
-    """
-    http://stackoverflow.com/questions/1767513/read-first-n-lines-of-a-file-in-python
-    Args:
-        path_file:
-        getrows:
-
-    Returns:
-
-    """
-    from itertools import islice
-    with open(path_file) as inp_file:
-        hdr = list(islice(inp_file, getrows))
-
-    return hdr
+    data = np.fromiter(iter_func(), dtype=dtype)
+    data = data.reshape((-1, iter_loadtxt.rowlength))
+    return data
 
 
 def open_or_die(path_file, perm='r', csv_header=0, skiprows=0, delimiter=' ', mask_val=-9999.0, format=''):
@@ -212,17 +581,9 @@ def get_ascii_plot_parameters(asc, step_length=10.0):
     return min, max, step
 
 
-def get_git_revision_hash():
-    """
-
-    Returns:
-
-    """
-    import subprocess
-
-    return subprocess.check_output(['git', 'rev-parse', 'HEAD'])
-
-
+######################
+# netCDF
+######################
 def get_nc_var3d(hndl_nc, var, year, subset_arr=None):
     """
     Get value from netcdf for variable var for year
@@ -332,37 +693,6 @@ def sum_area_nc(path_nc, var_name, carea, year):
     hndl_nc = open_or_die(path_nc)
 
     return np.ma.sum(carea * (get_nc_var3d(hndl_nc, var_name, year)))
-
-
-def transitions_to_matrix(flat_matrix):
-    """
-
-    Args:
-        flat_matrix:
-
-    Returns:
-
-    """
-    df_trans = flat_matrix.transpose().reset_index()
-
-    # Determine row and column names
-    df_trans['col_name'] = df_trans['index'].str.split('_to_').map(lambda x: x[1])
-    df_trans['row_name'] = df_trans['index'].str.split('_to_').map(lambda x: x[0])
-
-    # Delete duplicate rows which might exist if CFTs are not tracked
-    # In that case c3ann_to_urban and c4ann_to_urban will both be cropland_to_urban
-    df_trans.drop_duplicates(inplace=True)
-    # Create matrix
-    df_trans = df_trans.pivot(index='row_name', columns='col_name', values=0)
-
-    # Drop names
-    df_trans.index.name = None
-    df_trans.columns.name = None
-
-    # Fill Nan's by 0
-    df_trans.fillna(0, inplace=True)
-
-    return df_trans
 
 
 def convert_arr_to_nc(arr, var_name, lat, lon, out_nc_path, tme=''):
@@ -585,41 +915,6 @@ def avg_netcdf(path_nc, var, do_area_wt=False, area_data='', date=-1, tme_name='
     return arr_avg
 
 
-def avg_hist_asc(asc_data, bins=[], use_pos_vals=True, subset_asc=None, do_area_wt=False, area_data=''):
-    """
-    Create a weighted average array, return histogram and bin edge values
-    Args:
-        asc_data: ascii data
-        bins: Optional parameter: bins for computing histogram
-        use_pos_vals: Use +ve values only
-        subset_asc:
-        do_area_wt:
-        area_data:
-
-    Returns:
-        The values of the histogram, bin edges
-
-    """
-    if subset_asc is not None:
-        asc_data = np.ma.masked_where(subset_asc > 0.0, asc_data, 0.0)
-
-    if do_area_wt:
-        # Multiply fraction of grid cell by area
-        ar = open_or_die(area_data)
-        arr_avg = asc_data * ar
-    else:
-        arr_avg = asc_data
-
-    # Select values > 0.0 since -ve values are coming from non-land areas
-    if use_pos_vals:
-        arr_avg = np.ma.masked_where(arr_avg >= 0.0, arr_avg, 0.0)
-
-    if len(bins):
-        return np.histogram(arr_avg, bins=bins)
-    else:
-        return np.histogram(arr_avg)
-
-
 def avg_hist_netcdf(path_nc, var, bins=[], use_pos_vals=True, subset_asc=None, do_area_wt=False, area_data='', date=2015,
                     tme_name='time'):
     """
@@ -716,55 +1011,6 @@ def max_diff_netcdf(path_nc, var, fill_mask=False, tme_name='time'):
 
     hndl_nc.close()
     return arr_diff
-
-
-def avg_np_arr(data, block_size=1):
-    """
-    COARSENS: Takes data, and averages all positive (only numerical) numbers in blocks
-    E.g. with a block_size of 2, convert (720 x 1440) array into (360 x 720)
-    Args:
-        data: numpy array (2D)
-        block_size:
-
-    Returns:
-
-    """
-    dimensions = data.shape
-
-    if len(dimensions) > 2:
-        logging.info("Error: Cannot handle greater than 2D numpy array")
-        sys.exit(0)
-
-    # Down-sample image by applying function to local blocks.
-    # http://scikit-image.org/docs/dev/api/skimage.measure.html#skimage.measure.block_reduce
-    avrgd = block_reduce(data, block_size=(block_size, block_size), func=np.ma.mean)
-
-    return avrgd
-
-
-def upscale_np_arr(data, block_size=2):
-    """
-    Performs interpolation to up-size or down-size images
-    Args:
-        data:
-        block_size:
-
-    Returns:
-
-    """
-    dimensions = data.shape
-
-    if len(dimensions) > 2:
-        logging.info("Error: Cannot handle greater than 2D numpy array")
-        sys.exit(0)
-
-    # http://scikit-image.org/docs/dev/api/skimage.transform.html#skimage.transform.resize
-    from skimage.transform import resize
-    # Divide data by block_size ^ 2 so that data values are right
-    avrgd = resize(data/(block_size*block_size),
-                   output_shape=(dimensions[0]*block_size, dimensions[1]*block_size))
-
-    return avrgd
 
 
 def downscale_nc(path_nc, var_name, out_nc_name, scale=1.0, area_name='cell_area', lat_name='lat', lon_name='lon',
@@ -904,207 +1150,5 @@ def modify_nc_att(path_inp, vars, att_to_modify, new_att_value):
     hndl_inp.close()
 
 
-def extract_from_ascii(asc, ulat=90.0, llat=-90.0, llon=-180.0, rlon=180.0, res=1.0, subset_arr=None):
-    """
-    Extract from ascii, a window defined by ulat (top), llat(bottom), llon(left), rlon(right)
-    Args:
-        asc:
-        ulat:
-        llat:
-        llon:
-        rlon:
-        res:
-        subset_arr:
-
-    Returns:
-
-    """
-    top_row = int((90.0 - ulat)/res)
-    bottom_row = int(top_row + abs(llat - ulat)/res)
-
-    left_column = int(abs(-180.0 - llon)/res)
-    right_column = int(left_column + abs(rlon - llon)/res)
-
-    if subset_arr is None:
-        asc_subset = asc[top_row:bottom_row, left_column:right_column]
-    else:
-        asc_subset = asc[top_row:bottom_row, left_column:right_column] * \
-                     subset_arr[top_row:bottom_row, left_column:right_column]
-
-    return asc_subset
-
-
-def duplicate_columns(frame):
-    """
-    http://stackoverflow.com/questions/14984119/python-pandas-remove-duplicate-columns
-    Args:
-        frame:
-
-    Returns:
-
-    """
-    groups = frame.columns.to_series().groupby(frame.dtypes).groups
-    dups = []
-
-    for t, v in groups.items():
-
-        cs = frame[v].columns
-        vs = frame[v]
-        lcs = len(cs)
-
-        for i in range(lcs):
-            ia = vs.iloc[:, i].values
-            for j in range(i+1, lcs):
-                ja = vs.iloc[:, j].values
-                if pd.core.common.array_equivalent(ia, ja):
-                    dups.append(cs[i])
-                    break
-
-    return dups
-
-
-def send_email(to=[], subject='', contents=[]):
-    """
-
-    Args:
-        to:
-        subject:
-        contents:
-
-    Returns:
-
-    """
-    import yagmail
-
-    try:
-        yag = yagmail.SMTP('sahajpal.ritvik@gmail.com')
-        yag.send(to=to, subject=subject, contents=contents)
-        yag.close()
-    except:
-        logging.info('Error in sending email')
-
-
-def get_modification_date(filename):
-    """
-    http://stackoverflow.com/questions/237079/how-to-get-file-creation-modification-date-times-in-python
-    E.g. print modification_date('/var/log/syslog')
-    >>> 2009-10-06 10:50:01
-    Args:
-        filename:
-
-    Returns:
-
-    """
-    t = os.path.getmtime(filename)
-
-    return datetime.datetime.fromtimestamp(t)
-
-def compose_date(years, months=1, days=1, weeks=None, hours=None, minutes=None, seconds=None, milliseconds=None,
-                 microseconds=None, nanoseconds=None):
-    """
-    From http://stackoverflow.com/questions/34258892/converting-year-and-day-of-year-into-datetime-index-in-pandas
-    Args:
-        years:
-        months:
-        days:
-        weeks:
-        hours:
-        minutes:
-        seconds:
-        milliseconds:
-        microseconds:
-        nanoseconds:
-
-    Returns:
-
-    """
-    years = np.asarray(years) - 1970
-    months = np.asarray(months) - 1
-    days = np.asarray(days) - 1
-
-    types = ('<M8[Y]', '<m8[M]', '<m8[D]', '<m8[W]', '<m8[h]',
-             '<m8[m]', '<m8[s]', '<m8[ms]', '<m8[us]', '<m8[ns]')
-
-    vals = (years, months, days, weeks, hours, minutes, seconds,
-            milliseconds, microseconds, nanoseconds)
-
-    return sum(np.asarray(v, dtype=t) for t, v in zip(types, vals) if v is not None)
-
-
-def get_month_names():
-    """
-
-    Returns:
-
-    """
-    list_mon_names = []
-    for i in range(12):
-        list_mon_names.append(calendar.month_abbr[i + 1].title())
-
-    return list_mon_names
-
-
-def go_higher_dir_levels(path_to_dir, level=0):
-    """
-    Gien directory path, go up number of levels defined by level
-    :param path_to_dir:
-    :param level:
-    :return:
-    """
-    up_dir = path_to_dir
-
-    for lev in range(level):
-        up_dir = os.path.dirname(path_to_dir)
-
-    return up_dir
-
-
-def nan_helper(y):
-    """
-    http://stackoverflow.com/questions/6518811/interpolate-nan-values-in-a-numpy-array
-    Helper to handle indices and logical indices of NaN
-    Args:
-        y: y, 1d numpy array with possible NaNs
-
-    Returns:
-     - nans, logical indices of NaNs
-     - index, a function, with signature indices= index(logical_indices),
-       to convert logical indices of NaNs to 'equivalent' indices
-
-    """
-    return np.isnan(y), lambda z: z.nonzero()[0]
-
-
-def sliding_mean(data_array, window=5):
-    """
-    This function takes an array of numbers and smoothes them out.
-    Smoothing is useful for making plots a little easier to read.
-    Args:
-        data_array:
-        window:
-
-    Returns:
-
-    """
-    # Return without change if window size is zero
-    if window == 0:
-        return data_array
-
-    data_array = np.array(data_array)
-    new_list = []
-    for i in range(len(data_array)):
-        indices = range(max(i - window + 1, 0),
-                        min(i + window + 1, len(data_array)))
-        avg = 0
-        for j in indices:
-            avg += data_array[j]
-        avg /= float(len(indices))
-        new_list.append(avg)
-
-    return np.array(new_list)
-
-
 if __name__ == '__main__':
-    glm()
-
-
+    pass
