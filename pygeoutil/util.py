@@ -92,7 +92,7 @@ def get_git_revision_hash():
 
 def send_email(to=[], subject='', contents=[]):
     """
-
+    send email
     Args:
         to:
         subject:
