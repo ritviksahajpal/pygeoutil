@@ -355,6 +355,8 @@ def write_ascii(arr, path_out, name_fl, ncols, nrows, cell_size, xllcorner=-180,
     Returns:
 
     """
+    make_dir_if_missing(path_out)
+
     asc_file = open(path_out + os.sep + name_fl, 'w+')
 
     asc_file.write('ncols         %s\n' % ncols)
