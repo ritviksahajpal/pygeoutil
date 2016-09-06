@@ -226,7 +226,7 @@ def avg_np_arr(data, area_cells=None, block_size=1):
 
     # Down-sample image by applying function to local blocks.
     # http://scikit-image.org/docs/dev/api/skimage.measure.html#skimage.measure.block_reduce
-    if area_cells:
+    if area_cells is not None:
         avrgd = block_reduce(data * area_cells, block_size=(block_size, block_size), func=np.ma.mean)
     else:
         avrgd = block_reduce(data, block_size=(block_size, block_size), func=np.ma.mean)
@@ -256,8 +256,12 @@ def upscale_np_arr(data, area_cells=None, block_size=2):
     # http://scikit-image.org/docs/dev/api/skimage.transform.html#skimage.transform.resize
     from skimage.transform import resize
     # Divide data by block_size ^ 2 so that data values are right
-    avrgd = resize(data/(block_size*block_size),
-                   output_shape=(dimensions[0]*block_size, dimensions[1]*block_size))
+    if area_cells is not None:
+        avrgd = resize((data * area_cells)/(block_size*block_size),
+                       output_shape=(dimensions[0]*block_size, dimensions[1]*block_size))
+    else:
+        avrgd = resize(data/(block_size*block_size),
+                       output_shape=(dimensions[0]*block_size, dimensions[1]*block_size))
 
     return avrgd
 
