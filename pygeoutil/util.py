@@ -204,12 +204,13 @@ def sliding_mean(data_array, window=5):
 ######################
 # numpy array ops
 ######################
-def avg_np_arr(data, block_size=1):
+def avg_np_arr(data, area_cells=None, block_size=1):
     """
     COARSENS: Takes data, and averages all positive (only numerical) numbers in blocks
     E.g. with a block_size of 2, convert (720 x 1440) array into (360 x 720)
     Args:
         data: numpy array (2D)
+        area_cells:
         block_size:
 
     Returns:
@@ -217,13 +218,18 @@ def avg_np_arr(data, block_size=1):
     """
     dimensions = data.shape
 
+    if area_cells is not None and area_cells.shape != data.shape:
+        raise AssertionError('Shape of input data array and area array should be the same but is not')
+
     if len(dimensions) > 2:
-        logging.info("Error: Cannot handle greater than 2D numpy array")
-        sys.exit(0)
+        raise AssertionError('Error: Cannot handle greater than 2D numpy array')
 
     # Down-sample image by applying function to local blocks.
     # http://scikit-image.org/docs/dev/api/skimage.measure.html#skimage.measure.block_reduce
-    avrgd = block_reduce(data, block_size=(block_size, block_size), func=np.ma.mean)
+    if area_cells:
+        avrgd = block_reduce(data * area_cells, block_size=(block_size, block_size), func=np.ma.mean)
+    else:
+        avrgd = block_reduce(data, block_size=(block_size, block_size), func=np.ma.mean)
 
     return avrgd
 
