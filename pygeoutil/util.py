@@ -1,4 +1,3 @@
-import logging
 import math
 import os
 import errno
@@ -108,7 +107,7 @@ def send_email(to=[], subject='', contents=[]):
         yag.send(to=to, subject=subject, contents=contents)
         yag.close()
     except:
-        logging.info('Error in sending email')
+        raise ValueError('Error in sending email')
 
 
 def compose_date(years, months=1, days=1, weeks=None, hours=None, minutes=None, seconds=None, milliseconds=None,
@@ -443,15 +442,14 @@ def delete_files(list_file_paths):
     Returns:
 
     """
-    logging.info('delete_files')
     for fl in list_file_paths:
         if os.path.isfile(fl):
             try:
                 os.remove(fl)
             except:
-                logging.info('Not able to delete ' + fl)
+                raise IOError('Not able to delete ' + fl)
         else:
-            logging.info('Already deleted ' + fl)
+            raise IOError('Already deleted ' + fl)
 
 
 ######################
@@ -564,10 +562,10 @@ def open_or_die(path_file, perm='r', csv_header=0, skiprows=0, delimiter=' ', ma
             data = np.ma.masked_values(data, mask_val)
             return data
         else:
-            logging.error('Invalid file type ' + os.path.splitext(path_file)[1])
+            raise IOError('Invalid file type ' + os.path.splitext(path_file)[1])
             sys.exit(0)
     except:
-        logging.error('Error opening file ' + path_file)
+        raise IOError('Error opening file ' + path_file)
         sys.exit(0)
 
 
@@ -618,8 +616,7 @@ def get_nc_var3d(hndl_nc, var, year, subset_arr=None):
     if not use_subset_arr:
         ndim = subset_arr.ndim
         if ndim != 2:
-            logging.error('Incorrect dimensions of subset array (should be 2): ' + str(ndim))
-            sys.exit(0)
+            raise IOError('Incorrect dimensions of subset array (should be 2): ' + str(ndim))
 
     try:
         val = hndl_nc.variables[var][year, :, :]
@@ -627,12 +624,12 @@ def get_nc_var3d(hndl_nc, var, year, subset_arr=None):
         if not use_subset_arr:
             # Shapes should match for netCDF slice and subset array
             if val.shape != subset_arr.shape:
-                logging.error('Shapes do not match for netCDF slice and subset array')
+                raise AttributeError('Shapes do not match for netCDF slice and subset array')
             else:
                 val = val * subset_arr
     except:
         val = np.nan
-        logging.error('Error in getting var ' + var + ' for year ' + str(year) + ' from netcdf ')
+        raise AttributeError('Error in getting var ' + var + ' for year ' + str(year) + ' from netcdf ')
 
     return val
 
@@ -655,8 +652,7 @@ def get_nc_var2d(hndl_nc, var, subset_arr=None):
     if not use_subset_arr:
         ndim = subset_arr.ndim
         if ndim != 2:
-            logging.error('Incorrect dimensions of subset array (should be 2): ' + str(ndim))
-            sys.exit(0)
+            raise AttributeError('Incorrect dimensions of subset array (should be 2): ' + str(ndim))
 
     try:
         val = hndl_nc.variables[var][:, :]
@@ -664,12 +660,12 @@ def get_nc_var2d(hndl_nc, var, subset_arr=None):
         if not use_subset_arr:
             # Shapes should match for netCDF slice and subset array
             if val.shape != subset_arr.shape:
-                logging.error('Shapes do not match for netCDF slice and subset array')
+                raise AttributeError('Shapes do not match for netCDF slice and subset array')
             else:
                 val = val * subset_arr
     except:
         val = np.nan
-        logging.info('Error in getting var ' + var + ' from netcdf ')
+        raise AttributeError('Error in getting var ' + var + ' from netcdf ')
 
     return val
 
@@ -688,7 +684,7 @@ def get_nc_var1d(hndl_nc, var):
         val = hndl_nc.variables[var][:]
     except:
         val = np.nan
-        logging.info('Error in getting var ' + var + ' from netcdf ')
+        raise AttributeError('Error in getting var ' + var + ' from netcdf ')
 
     return val
 
@@ -1006,7 +1002,6 @@ def max_diff_netcdf(path_nc, var, fill_mask=False, tme_name='time'):
         List of sum values (could be single value if date == -1)
 
     """
-    logging.info('max_diff_netcdf ' + var)
     arr_diff = []
     hndl_nc = open_or_die(path_nc)
 
