@@ -218,7 +218,7 @@ def avg_np_arr(data, area_cells=None, block_size=1):
     """
     dimensions = data.shape
 
-    if area_cells is not None and area_cells.shape != data.shape:
+    if area_cells is not None and area_cells.shape != dimensions:
         raise AssertionError('Shape of input data array and area array should be the same but is not')
 
     if len(dimensions) > 2:
@@ -234,11 +234,12 @@ def avg_np_arr(data, area_cells=None, block_size=1):
     return avrgd
 
 
-def upscale_np_arr(data, block_size=2):
+def upscale_np_arr(data, area_cells=None, block_size=2):
     """
     Performs interpolation to up-size or down-size images
     Args:
         data:
+        area_cells:
         block_size:
 
     Returns:
@@ -246,9 +247,11 @@ def upscale_np_arr(data, block_size=2):
     """
     dimensions = data.shape
 
+    if area_cells is not None and area_cells.shape != dimensions:
+        raise AssertionError('Shape of input data array and area array should be the same but is not')
+
     if len(dimensions) > 2:
-        logging.info("Error: Cannot handle greater than 2D numpy array")
-        sys.exit(0)
+        raise AssertionError('Error: Cannot handle greater than 2D numpy array')
 
     # http://scikit-image.org/docs/dev/api/skimage.transform.html#skimage.transform.resize
     from skimage.transform import resize
