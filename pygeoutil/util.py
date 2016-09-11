@@ -203,7 +203,7 @@ def sliding_mean(data_array, window=5):
 ######################
 # numpy array ops
 ######################
-def avg_np_arr(data, area_cells=None, block_size=1):
+def avg_np_arr(data, area_cells=None, block_size=1, func=np.ma.mean):
     """
     COARSENS: Takes data, and averages all positive (only numerical) numbers in blocks
     E.g. with a block_size of 2, convert (720 x 1440) array into (360 x 720)
@@ -226,9 +226,9 @@ def avg_np_arr(data, area_cells=None, block_size=1):
     # Down-sample image by applying function to local blocks.
     # http://scikit-image.org/docs/dev/api/skimage.measure.html#skimage.measure.block_reduce
     if area_cells is not None:
-        avrgd = block_reduce(data * area_cells, block_size=(block_size, block_size), func=np.ma.mean)
+        avrgd = block_reduce(data * area_cells, block_size=(block_size, block_size), func=func)
     else:
-        avrgd = block_reduce(data, block_size=(block_size, block_size), func=np.ma.mean)
+        avrgd = block_reduce(data, block_size=(block_size, block_size), func=func)
 
     return avrgd
 

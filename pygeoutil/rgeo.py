@@ -293,5 +293,32 @@ def extract_at_point_from_ras(path_ras, lon, lat):
             return np.asarray(src.sample([(lon, lat)]))
 
 
+def get_grid_cell_area(nrows, ncols):
+    """
+
+    :param nrows: Number of rows
+    :param ncols: Number of columns
+    :return:
+    """
+    R = 6371.0  # radius of earth
+    csize = 180. / nrows
+
+    cell_area = np.zeros(shape=(nrows, ncols))
+    lat = np.zeros(shape=(nrows,))
+
+    for i in range(nrows):
+        lat[i] = i * csize
+
+    lat = lat * np.pi / 180.
+
+    sarea = np.pi / 180. * csize * np.power(R, 2.) * (np.cos(lat) - np.cos(lat + np.pi * csize / 180))
+    cell_area = np.zeros((nrows, ncols))
+
+    for i in range(nrows):
+        cell_area[i, :] = sarea[i]
+
+    return cell_area
+
+
 if __name__ == '__main__':
     pass
