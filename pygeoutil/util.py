@@ -611,6 +611,10 @@ def get_nc_var3d(hndl_nc, var, year, subset_arr=None):
     # TODO: Function assumes that subset_arr is boolean i.e. 1 or 0 (if not, errors can happen)
     use_subset_arr = subset_arr is None
 
+    # Return if number of dimensions is not 3
+    if len(hndl_nc.variables[var].dimensions) != 3:
+        return np.nan
+
     # If subset arr exists, then it should have 2 dimensions (x and y)
     if not use_subset_arr:
         ndim = subset_arr.ndim
@@ -644,6 +648,10 @@ def get_nc_var2d(hndl_nc, var, subset_arr=None):
     Returns:
 
     """
+    # Return if number of dimensions is not 2
+    if len(hndl_nc.variables[var].dimensions) != 2:
+        return np.nan
+
     # TODO: Function assumes that subset_arr is boolean i.e. 1 or 0 (if not, errors can happen)
     use_subset_arr = subset_arr is None
 
@@ -679,6 +687,10 @@ def get_nc_var1d(hndl_nc, var):
     Returns:
 
     """
+    # Return if number of dimensions is not 1
+    if len(hndl_nc.variables[var].dimensions) != 1:
+        return np.nan
+
     try:
         val = hndl_nc.variables[var][:]
     except:
