@@ -688,6 +688,66 @@ def get_nc_var1d(hndl_nc, var):
     return val
 
 
+def get_time_nc(path_nc, name_time_var='time'):
+    """
+
+    Args:
+        path_nc:
+        name_time_var:
+
+    Returns:
+
+    """
+    hndl_nc = open_or_die(path_nc)
+
+    var_time = get_nc_var1d(hndl_nc, var=name_time_var)
+
+    return var_time
+
+
+def get_dims_in_nc(path_nc):
+    """
+
+    Args:
+        path_nc:
+
+    Returns:
+
+    """
+    hndl_nc = open_or_die(path_nc)
+    list_dims = []
+
+    for name_dim, dim in hndl_nc.dimensions.iteritems():
+        # Append dimension names to list_dims
+        list_dims.append(name_dim)
+
+    return list_dims
+
+
+def get_vars_in_nc(path_nc, ignore_var=None):
+    """
+    Get list of variables in netCDF file, ignore variables in ignore_var list
+    Args:
+        path_nc:
+        ignore_var:
+
+    Returns:
+
+    """
+    hndl_nc = open_or_die(path_nc)
+    list_vars = []
+
+    for idx, (name_var, var) in enumerate(hndl_nc.variables.iteritems()):
+        if ignore_var is not None:
+            if name_var in ignore_var:
+                continue
+
+        # Append variable to list of variables
+        list_vars.append(name_var)
+
+    return list_vars
+
+
 def sum_area_nc(path_nc, var_name, carea, year):
     """
 
@@ -841,7 +901,7 @@ def convert_nc_to_csv(path_nc, var_name='data', csv_out='output', do_time=False,
     hndl_nc.close()
 
 
-def subtract_netcdf(left_nc, right_nc, left_var, right_var='', date=-1, tme_name='time'):
+def subtract_netcdf(left_nc, right_nc, left_var, right_var=None, date=-1, tme_name='time'):
     """
     Subtract right_nc from left_nc and return numpy array
     Args:
@@ -860,7 +920,7 @@ def subtract_netcdf(left_nc, right_nc, left_var, right_var='', date=-1, tme_name
 
     # If right_var is not specified then assume it to be same as left_var
     # Useful to find out if netCDF is staying constant
-    if len(right_var) == 0:
+    if right_var is None:
         right_var = left_var
 
     ts = get_nc_var1d(hndl_left, var=tme_name)  # time-series
