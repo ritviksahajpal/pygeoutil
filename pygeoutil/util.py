@@ -913,43 +913,38 @@ def convert_nc_to_csv(path_nc, var_name='data', csv_out='output', do_time=False,
     hndl_nc.close()
 
 
-def subtract_netcdf(left_nc, right_nc, left_var, right_var=None, date=-1, tme_name='time'):
+def subtract_netcdf(left_hndl, right_hndl, left_var, right_var=None, date=-1, tme_name='time'):
     """
-    Subtract right_nc from left_nc and return numpy array
+    Subtract right_hndl from left_nc and return numpy array
     Args:
-        left_nc: netCDF file to subtract from
-        right_nc: netCDF file getting subtracted
+        left_hndl: netCDF file to subtract from
+        right_hndl: netCDF file getting subtracted
         left_var: Variable to extract from left_nc
-        right_var: Variable to extract from right_nc
+        right_var: Variable to extract from right_hndl
         date: Which year to extract (or last year)
         tme_name:
 
     Returns:
-        numpy array (left_nc - right_nc)
+        numpy array (left_hndl - right_hndl)
     """
-    hndl_left = open_or_die(left_nc)
-    hndl_right = open_or_die(right_nc)
 
     # If right_var is not specified then assume it to be same as left_var
     # Useful to find out if netCDF is staying constant
     if right_var is None:
         right_var = left_var
 
-    ts = get_nc_var1d(hndl_left, var=tme_name)  # time-series
-    ts_r = get_nc_var1d(hndl_right, var=tme_name)  # time-series
+    ts = get_nc_var1d(left_hndl, var=tme_name)  # time-series
+    ts_r = get_nc_var1d(right_hndl, var=tme_name)  # time-series
     ts = ts if len(ts) < len(ts_r) else ts_r
     if date == -1:  # Plot either the last year {len(ts)-1} or whatever year the user wants
         yr = len(ts) - 1
     else:
         yr = date - ts[0]
 
-    left_data = get_nc_var3d(hndl_left, var=left_var, year=yr)
-    right_data = get_nc_var3d(hndl_right, var=right_var, year=yr)
+    left_data = get_nc_var3d(left_hndl, var=left_var, year=yr)
+    right_data = get_nc_var3d(right_hndl, var=right_var, year=yr)
 
     diff_data = left_data - right_data
-
-    hndl_left.close()
-    hndl_right.close()
 
     return diff_data
 
