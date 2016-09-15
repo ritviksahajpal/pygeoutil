@@ -736,6 +736,25 @@ def get_dims_in_nc(path_nc):
     return list_dims
 
 
+def rename_vars_in_nc(path_nc, dict_rename):
+    """
+
+    Args:
+        path_nc:
+        dict_rename:
+
+    Returns:
+
+    """
+    hndl_nc = open_or_die(path_nc, perm='r+')
+
+    # Iterate over dictionary and rename
+    for original_name, final_name in dict_rename.items():
+        hndl_nc.renameVariable(original_name, final_name)
+
+    hndl_nc.close()
+
+
 def get_vars_in_nc(path_nc, ignore_var=None):
     """
     Get list of variables in netCDF file, ignore variables in ignore_var list
