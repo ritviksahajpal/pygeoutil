@@ -164,6 +164,16 @@ def convert_raster_to_ascii(path_input_raster, path_ascii_output, overwrite=True
     path_inp_ds = None
 
 
+def get_geo_idx(val_dd, array_dd):
+    """
+    Get the index of the nearest decimal degree in an array of decimal degrees
+    :param val_dd:
+    :param array_dd:
+    :return:
+    """
+    return (np.abs(array_dd - val_dd)).argmin()
+
+
 @lru_cache(maxsize=1024)
 def get_latlon_location(loc):
     """
