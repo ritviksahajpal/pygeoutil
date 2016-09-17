@@ -164,12 +164,32 @@ def convert_raster_to_ascii(path_input_raster, path_ascii_output, overwrite=True
     path_inp_ds = None
 
 
+def get_arr_res(lats, lons):
+    """
+    Get resolution of array from lat lon data
+    Args:
+        lats:
+        lons:
+
+    Returns:
+
+    """
+    # Check if both lat and lon have same shape
+    if np.isclose(np.abs(lats[1] - lats[0]),  np.abs(lons[1] - lons[0])):
+        return np.abs(lats[1] - lats[0])
+    else:
+        raise ValueError('lat and lon do not have same shape')
+
+
 def get_geo_idx(val_dd, array_dd):
     """
     Get the index of the nearest decimal degree in an array of decimal degrees
-    :param val_dd:
-    :param array_dd:
-    :return:
+    Args:
+        val_dd:
+        array_dd:
+
+    Returns:
+
     """
     return (np.abs(array_dd - val_dd)).argmin()
 

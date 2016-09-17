@@ -5,6 +5,7 @@ import pdb
 import datetime
 import sys
 
+import xarray as xr
 import numpy as np
 import pandas as pd
 import netCDF4
@@ -526,7 +527,8 @@ def iter_loadtxt(filename, delimiter=',', skiprows=0, dtype=float):
     return data
 
 
-def open_or_die(path_file, perm='r', csv_header=0, skiprows=0, delimiter=' ', mask_val=-9999.0, format=''):
+def open_or_die(path_file, perm='r', csv_header=0, skiprows=0, delimiter=' ', mask_val=-9999.0, use_xarray=False,
+                format=''):
     """
     Open file or quit gracefully
     Args:
@@ -536,6 +538,7 @@ def open_or_die(path_file, perm='r', csv_header=0, skiprows=0, delimiter=' ', ma
         skiprows:
         delimiter:
         mask_val:
+        use_xarray:
         format: Special code for some file openings
 
     Returns:
@@ -543,7 +546,7 @@ def open_or_die(path_file, perm='r', csv_header=0, skiprows=0, delimiter=' ', ma
 
     """
     try:
-        if os.path.splitext(path_file)[1] == '.nc':
+        if os.path.splitext(path_file)[1] == '.nc' and not use_xarray:
             hndl = netCDF4.Dataset(path_file, perm, format='NETCDF4')
             return hndl
         elif os.path.splitext(path_file)[1] == '.csv':
@@ -560,6 +563,9 @@ def open_or_die(path_file, perm='r', csv_header=0, skiprows=0, delimiter=' ', ma
             data = iter_loadtxt(path_file, delimiter=delimiter, skiprows=skiprows)
             data = np.ma.masked_values(data, mask_val)
             return data
+        elif os.path.splitext(path_file)[1] == '.nc' and use_xarray:
+            hndl = xr.open_mfdataset(path_file, decode_times=False)
+            return hndl
         else:
             raise IOError('Invalid file type ' + os.path.splitext(path_file)[1])
             sys.exit(0)
@@ -596,6 +602,52 @@ def get_ascii_plot_parameters(asc, step_length=10.0):
 ######################
 # netCDF
 ######################
+def get_nc_var4d(hndl_nc, var, year, pos=0, use_xarray=False):
+    """
+
+    Args:
+        hndl_nc:
+        var:
+        year:
+        pos:
+        use_xarray:
+
+    Returns:
+
+    """
+    # Return if number of dimensions is not 4
+    # TODO: Assumes xarray, will not work for netCDF4
+    if use_xarray:
+        if len(hndl_nc.variables[var].dims) != 4:
+            return np.nan
+    else:
+        if len(hndl_nc.variables[var].dimensions) != 4:
+            return np.nan
+
+    if pos == 0:
+        if use_xarray:
+            val = hndl_nc.variables[var][year, :, :, :].values
+        else:
+            val = hndl_nc.variables[var][year, :, :, :]
+    elif pos == 1:
+        if use_xarray:
+            val = hndl_nc.variables[var][:, year, :, :].values
+        else:
+            val = hndl_nc.variables[var][:, year, :, :]
+    elif pos == 2:
+        if use_xarray:
+            val = hndl_nc.variables[var][:, :, year, :].values
+        else:
+            val = hndl_nc.variables[var][:, :, year, :]
+    else:
+        if use_xarray:
+            val = hndl_nc.variables[var][:, :, :, year].values
+        else:
+            val = hndl_nc.variables[var][:, :, :, year]
+
+    return val
+
+
 def get_nc_var3d(hndl_nc, var, year, subset_arr=None):
     """
     Get value from netcdf for variable var for year
