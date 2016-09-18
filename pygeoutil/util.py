@@ -1296,6 +1296,45 @@ def downscale_nc(path_nc, var_name, out_nc_name, scale=1.0, area_name='cell_area
     onc.close()
 
 
+def add_bounds_to_nc(path_inp_nc, do_lat_bounds=True, do_lon_bounds=True, do_time_bounds=True):
+    """
+
+    Args:
+        path_inp_nc:
+        do_lat_bounds:
+        do_lon_bounds:
+        do_time_bounds:
+
+    Returns:
+
+    """
+    with open_or_die(path_inp_nc, perm='r+') as hndl_nc:
+        name_dims = get_dims_in_nc(path_inp_nc)
+        name_vars = get_vars_in_nc(path_inp_nc)
+
+        # Create bounds dimension
+        if 'bounds' not in name_dims:
+            hndl_nc.createDimension('bounds', 2)
+
+        if do_lat_bounds and 'lat_bounds' not in name_vars:
+            lats = hndl_nc.variables['lat'][:]
+            out_var = hndl_nc.createVariable('lat_bounds', 'f8', ('lat', 'bounds',))
+            out_var[:] = np.vstack((lats - 0.5 * (lats[1] - lats[0]), lats + 0.5 * (lats[1] - lats[0]))).T
+
+        if do_lon_bounds and 'lon_bounds' not in name_vars:
+            lons = hndl_nc.variables['lon'][:]
+            out_var = hndl_nc.createVariable('lon_bounds', 'f8', ('lon', 'bounds',))
+            out_var[:] = np.vstack((lons - 0.5 * (lons[1] - lons[0]), lons + 0.5 * (lons[1] - lons[0]))).T
+
+        if do_time_bounds and 'time_bnds' not in name_vars:
+            time = hndl_nc.variables['time'][:]
+            out_var = hndl_nc.createVariable('time_bnds', 'i4', ('time', 'bounds',))
+
+            for idx in range(time.shape[0]):
+                out_var[idx, 0] = 1
+                out_var[idx, 1] = 365
+
+
 def modify_desc_in_nc(path_nc, val_att):
     """
     Modify the global description attribute in netCDF file
