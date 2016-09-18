@@ -595,7 +595,7 @@ def open_or_die(path_file, perm='r', csv_header=0, skiprows=0, delimiter=' ', ma
             data = np.ma.masked_values(data, mask_val)
             return data
         elif os.path.splitext(path_file)[1] == '.nc' and use_xarray:
-            hndl = xr.open_mfdataset(path_file, decode_times=False)
+            hndl = merge_nc_files(path_file)
             return hndl
         else:
             raise IOError('Invalid file type ' + os.path.splitext(path_file)[1])
@@ -878,7 +878,7 @@ def create_nc_var(hndl_nc, var, name_var, dims):
     dtype = 'f8' if var.dtype == 'datetime64[ns]' else var.dtype
 
     out_var_nc = hndl_nc.createVariable(name_var, dtype, dims)
-    out_var_nc.setncatts({k: v for k, v in var.attrs.items()})
+    out_var_nc.setncatts({k: var.getncattr(k) for k in var.ncattrs()})
 
     return out_var_nc
 
@@ -1418,6 +1418,52 @@ def modify_nc_val(path_inp, var, new_val):
     """
     with open_or_die(path_inp, perm='r+') as hndl_inp:
         hndl_inp[var][:] = new_val
+
+
+def merge_nc_files(list_nc_files, path_out_nc):
+    """
+
+    Args:
+        list_nc_files:
+        path_out_nc:
+
+    Returns:
+
+    """
+    list_dims = []  # List of dimensions in input netCDF file
+    list_vars = []
+
+    if os.path.exists(path_out_nc):
+        return
+
+    hndl_out_nc = open_or_die(path_out_nc, perm='w')
+
+    for fl in list_nc_files:
+        hndl_nc = open_or_die(fl)
+
+        # Copy dimensions
+        for name_dim, dim in hndl_nc.dimensions.iteritems():
+            if name_dim not in list_dims:
+                # Append dimension names to list_dims
+                list_dims.append(name_dim)
+                hndl_out_nc.createDimension(name_dim, len(dim) if not dim.isunlimited() else None)
+
+        # Copy variables
+        for idx, (name_var, var) in enumerate(hndl_nc.variables.iteritems()):
+            if name_var not in list_vars:
+                list_vars.append(name_var)
+
+                out_var = hndl_out_nc.createVariable(name_var, var.datatype, var.dimensions)
+
+                # Copy variable attributes
+                out_var.setncatts({k: var.getncattr(k) for k in var.ncattrs()})
+
+                # Copy variable data
+                out_var[:] = var[:]
+
+        hndl_nc.close()
+
+    hndl_out_nc.close()
 
 
 if __name__ == '__main__':
