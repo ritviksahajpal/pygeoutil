@@ -834,7 +834,6 @@ def rename_vars_in_nc(path_nc, dict_rename):
 
     for var in vars:
         if var in dict_rename.keys():
-            print var, dict_rename[var][0]
             hndl_nc.renameVariable(var, dict_rename[var][0])
 
     hndl_nc.close()
@@ -1297,6 +1296,23 @@ def downscale_nc(path_nc, var_name, out_nc_name, scale=1.0, area_name='cell_area
     onc.close()
 
 
+def modify_desc_in_nc(path_nc, val_att):
+    """
+    Modify the global description attribute in netCDF file
+    Args:
+        path_nc:
+        val_att
+
+    Returns:
+
+    """
+    with open_or_die(path_nc, perm='r+') as hndl_nc:
+        if 'description' in hndl_nc.ncattrs():
+            hndl_nc.description = hndl_nc.description + '; ' + val_att
+        else:
+            hndl_nc.description = val_att
+
+
 def add_nc_vars_to_new_var(path_inp, vars, new_var='tmp'):
     """
 
@@ -1348,6 +1364,21 @@ def modify_nc_att(path_inp, vars, att_to_modify, new_att_value):
                     var.setncatts({k: new_att_value})
 
     hndl_inp.close()
+
+
+def modify_nc_val(path_inp, var, new_val):
+    """
+
+    Args:
+        path_inp:
+        var:
+        new_val:
+
+    Returns:
+
+    """
+    with open_or_die(path_inp, perm='r+') as hndl_inp:
+        hndl_inp[var][:] = new_val
 
 
 if __name__ == '__main__':
