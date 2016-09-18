@@ -5,6 +5,8 @@ import pdb
 import datetime
 import sys
 
+import rgeo
+
 import xarray as xr
 import numpy as np
 import pandas as pd
@@ -204,6 +206,35 @@ def sliding_mean(data_array, window=5):
 ######################
 # numpy array ops
 ######################
+def replace_subset_arr(lats, lons, cell_size, subset_arr):
+    """
+
+    Args:
+        lats:
+        lons:
+        cell_size:
+        subset_arr:
+
+    Returns:
+
+    """
+    arr_global = np.zeros((int(180. // cell_size), int(360. // cell_size)))
+
+    latitudes = np.arange(90.0 - cell_size / 2.0, -90.0, -cell_size)
+    longitudes = np.arange(-180.0 + cell_size / 2.0, 180.0, cell_size)
+
+    start_row = rgeo.get_geo_idx(lats[0], latitudes)
+    end_row = rgeo.get_geo_idx(lats[-1], latitudes)
+
+    start_col = rgeo.get_geo_idx(lons[0], longitudes)
+    end_col = rgeo.get_geo_idx(lons[-1], longitudes)
+
+    subset_arr = np.nan_to_num(subset_arr)
+    arr_global[start_row:end_row + 1, start_col:end_col + 1] = subset_arr
+
+    return arr_global
+
+
 def avg_np_arr(data, area_cells=None, block_size=1, func=np.ma.mean):
     """
     COARSENS: Takes data, and averages all positive (only numerical) numbers in blocks
@@ -799,10 +830,12 @@ def rename_vars_in_nc(path_nc, dict_rename):
 
     """
     hndl_nc = open_or_die(path_nc, perm='r+')
+    vars = get_vars_in_nc(path_nc)
 
-    # Iterate over dictionary and rename
-    for original_name, final_name in dict_rename.items():
-        hndl_nc.renameVariable(original_name, final_name)
+    for var in vars:
+        if var in dict_rename.keys():
+            print var, dict_rename[var][0]
+            hndl_nc.renameVariable(var, dict_rename[var][0])
 
     hndl_nc.close()
 
@@ -829,6 +862,26 @@ def get_vars_in_nc(path_nc, ignore_var=None):
         list_vars.append(name_var)
 
     return list_vars
+
+
+def create_nc_var(hndl_nc, var, name_var, dims):
+    """
+
+    Args:
+        hndl_nc:
+        var:
+        name_var:
+        dims:
+
+    Returns:
+
+    """
+    dtype = 'f8' if var.dtype == 'datetime64[ns]' else var.dtype
+
+    out_var_nc = hndl_nc.createVariable(name_var, dtype, dims)
+    out_var_nc.setncatts({k: v for k, v in var.attrs.items()})
+
+    return out_var_nc
 
 
 def sum_area_nc(path_nc, var_name, carea, year):
