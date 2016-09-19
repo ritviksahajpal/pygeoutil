@@ -595,8 +595,7 @@ def open_or_die(path_file, perm='r', csv_header=0, skiprows=0, delimiter=' ', ma
             data = np.ma.masked_values(data, mask_val)
             return data
         elif os.path.splitext(path_file)[1] == '.nc' and use_xarray:
-            hndl = merge_nc_files(path_file)
-            return hndl
+            merge_nc_files(path_file)
         else:
             raise IOError('Invalid file type ' + os.path.splitext(path_file)[1])
             sys.exit(0)
@@ -877,7 +876,7 @@ def create_nc_var(hndl_nc, var, name_var, dims):
     """
     dtype = 'f8' if var.dtype == 'datetime64[ns]' else var.dtype
 
-    out_var_nc = hndl_nc.createVariable(name_var, dtype, dims)
+    out_var_nc = hndl_nc.createVariable(name_var, dtype, dims, zlib=True)
     out_var_nc.setncatts({k: var.getncattr(k) for k in var.ncattrs()})
 
     return out_var_nc
@@ -921,13 +920,13 @@ def convert_arr_to_nc(arr, var_name, lat, lon, out_nc_path, tme=''):
     onc.createDimension('lon', np.shape(lon)[0])
     if len(tme) > 1:
         onc.createDimension('time', np.shape(tme)[0])
-        time = onc.createVariable('time', 'i4', ('time',))
+        time = onc.createVariable('time', 'i4', ('time',), zlib=True)
         # Assign time
         time[:] = tme
 
     # variables
-    latitudes = onc.createVariable('lat', 'f4', ('lat',))
-    longitudes = onc.createVariable('lon', 'f4', ('lon',))
+    latitudes = onc.createVariable('lat', 'f4', ('lat',), zlib=True)
+    longitudes = onc.createVariable('lon', 'f4', ('lon',), zlib=True)
 
     # Metadata
     latitudes.units = 'degrees_north'
@@ -941,13 +940,13 @@ def convert_arr_to_nc(arr, var_name, lat, lon, out_nc_path, tme=''):
 
     # Assign data
     if len(tme) > 1:
-        onc_var = onc.createVariable(var_name, 'f4', ('time', 'lat', 'lon',), fill_value=np.nan)
+        onc_var = onc.createVariable(var_name, 'f4', ('time', 'lat', 'lon',), fill_value=np.nan, zlib=True)
         # Iterate over all years
         for j in np.arange(tme):
             onc_var[j, :, :] = arr[j, :, :]
     else:
         # Only single year data
-        onc_var = onc.createVariable(var_name, 'f4', ('lat', 'lon',), fill_value=np.nan)
+        onc_var = onc.createVariable(var_name, 'f4', ('lat', 'lon',), fill_value=np.nan, zlib=True)
         onc_var[:, :] = arr[:, :]
 
     onc.close()
@@ -989,9 +988,9 @@ def convert_ascii_nc(asc_data, out_path, num_lats, num_lons, skiprows=0, var_nam
     nc_data.createDimension('lon', asc_data.shape[1])
 
     # Populate and output nc file
-    latitudes = nc_data.createVariable('lat', 'f4', ('lat',))
-    longitudes = nc_data.createVariable('lon', 'f4', ('lon',))
-    data = nc_data.createVariable(var_name, 'f4', ('lat', 'lon',), fill_value=np.nan)
+    latitudes = nc_data.createVariable('lat', 'f4', ('lat',), zlib=True)
+    longitudes = nc_data.createVariable('lon', 'f4', ('lon',), zlib=True)
+    data = nc_data.createVariable(var_name, 'f4', ('lat', 'lon',), fill_value=np.nan, zlib=True)
 
     data.units = ''
 
@@ -1245,14 +1244,14 @@ def downscale_nc(path_nc, var_name, out_nc_name, scale=1.0, area_name='cell_area
     onc.createDimension('lon', int(num_lons * scale))
     if len(ts) > 1:
         onc.createDimension('time', np.shape(ts)[0])
-        time = onc.createVariable('time', 'i4', ('time',))
+        time = onc.createVariable('time', 'i4', ('time',), zlib=True)
         # Assign time
         time[:] = ts
 
     # variables
-    latitudes = onc.createVariable('lat', 'f4', ('lat',))
-    longitudes = onc.createVariable('lon', 'f4', ('lon',))
-    cell_area = onc.createVariable(area_name, 'f4', ('lat', 'lon',), fill_value=np.nan)
+    latitudes = onc.createVariable('lat', 'f4', ('lat',), zlib=True)
+    longitudes = onc.createVariable('lon', 'f4', ('lon',), zlib=True)
+    cell_area = onc.createVariable(area_name, 'f4', ('lat', 'lon',), fill_value=np.nan, zlib=True)
 
     # Metadata
     latitudes.units = 'degrees_north'
@@ -1267,7 +1266,7 @@ def downscale_nc(path_nc, var_name, out_nc_name, scale=1.0, area_name='cell_area
 
     # Assign data
     if len(ts) > 1:
-        onc_var = onc.createVariable(var_name, 'f4', ('time', 'lat', 'lon',), fill_value=np.nan)
+        onc_var = onc.createVariable(var_name, 'f4', ('time', 'lat', 'lon',), fill_value=np.nan, zlib=True)
         # Iterate over all years
         for j in np.arange(len(ts)):
             # Get data from coarse resolution netCDF
@@ -1277,7 +1276,7 @@ def downscale_nc(path_nc, var_name, out_nc_name, scale=1.0, area_name='cell_area
             onc_var[j, :, :] = finer_arr[:, :]
     else:
         # Only single year data
-        onc_var = onc.createVariable(var_name, 'f4', ('lat', 'lon',), fill_value=np.nan)
+        onc_var = onc.createVariable(var_name, 'f4', ('lat', 'lon',), fill_value=np.nan, zlib=True)
         # Get data from coarse resolution netCDF
         coarse_arr = get_nc_var2d(hndl_nc, var=var_name)
         # Create finer resolution numpy array
@@ -1318,17 +1317,17 @@ def add_bounds_to_nc(path_inp_nc, do_lat_bounds=True, do_lon_bounds=True, do_tim
 
         if do_lat_bounds and 'lat_bounds' not in name_vars:
             lats = hndl_nc.variables['lat'][:]
-            out_var = hndl_nc.createVariable('lat_bounds', 'f8', ('lat', 'bounds',))
+            out_var = hndl_nc.createVariable('lat_bounds', 'f8', ('lat', 'bounds',), zlib=True)
             out_var[:] = np.vstack((lats - 0.5 * (lats[1] - lats[0]), lats + 0.5 * (lats[1] - lats[0]))).T
 
         if do_lon_bounds and 'lon_bounds' not in name_vars:
             lons = hndl_nc.variables['lon'][:]
-            out_var = hndl_nc.createVariable('lon_bounds', 'f8', ('lon', 'bounds',))
+            out_var = hndl_nc.createVariable('lon_bounds', 'f8', ('lon', 'bounds',), zlib=True)
             out_var[:] = np.vstack((lons - 0.5 * (lons[1] - lons[0]), lons + 0.5 * (lons[1] - lons[0]))).T
 
         if do_time_bounds and 'time_bnds' not in name_vars:
             time = hndl_nc.variables['time'][:]
-            out_var = hndl_nc.createVariable('time_bnds', 'i4', ('time', 'bounds',))
+            out_var = hndl_nc.createVariable('time_bnds', 'i4', ('time', 'bounds',), zlib=True)
 
             for idx in range(time.shape[0]):
                 out_var[idx, 0] = 1
@@ -1363,23 +1362,24 @@ def add_nc_vars_to_new_var(path_inp, vars, new_var='tmp'):
     Returns:
 
     """
-    hndl_inp = open_or_die(path_inp, perm='r+')
+    if new_var in get_vars_in_nc(path_inp):
+        return
 
-    for idx, (name_var, var) in enumerate(hndl_inp.variables.iteritems()):
-        if name_var in vars:
-            out_var = hndl_inp.createVariable(new_var, var.datatype, var.dimensions)
-            out_var.setncatts({k: var.getncattr(k) for k in var.ncattrs()})
-            break
+    with open_or_die(path_inp, perm='r+') as hndl_inp:
+        for idx, (name_var, var) in enumerate(hndl_inp.variables.iteritems()):
+            if name_var in vars:
+                out_var = hndl_inp.createVariable(new_var, var.datatype, var.dimensions, zlib=True)
+                out_var.setncatts({k: var.getncattr(k) for k in var.ncattrs()})
+                break
 
-    # Create empty array
-    arr3d = np.zeros_like(hndl_inp.variables[vars[0]])
-    for v in vars:
-        arr3d[:] = arr3d[:] + hndl_inp.variables[v][:]
+        # Create empty array
+        arr3d = np.zeros_like(hndl_inp.variables[vars[0]])
+        for v in vars:
+            arr3d[:] = arr3d[:] + hndl_inp.variables[v][:]
 
-    # Assign data to new variable
-    out_var[:] = arr3d[:]
+        # Assign data to new variable
+        out_var[:] = arr3d[:]
 
-    hndl_inp.close()
 
 
 def modify_nc_att(path_inp, vars, att_to_modify, new_att_value):
@@ -1394,15 +1394,12 @@ def modify_nc_att(path_inp, vars, att_to_modify, new_att_value):
     Returns:
 
     """
-    hndl_inp = open_or_die(path_inp, perm='r+')
-
-    for idx, (name_var, var) in enumerate(hndl_inp.variables.iteritems()):
-        if name_var in vars:
-            for k in var.ncattrs():
-                if k == att_to_modify:
-                    var.setncatts({k: new_att_value})
-
-    hndl_inp.close()
+    with open_or_die(path_inp, perm='r+') as hndl_inp:
+        for idx, (name_var, var) in enumerate(hndl_inp.variables.iteritems()):
+            if name_var in vars:
+                for k in var.ncattrs():
+                    if k == att_to_modify:
+                        var.setncatts({k: new_att_value})
 
 
 def modify_nc_val(path_inp, var, new_val):
@@ -1453,7 +1450,7 @@ def merge_nc_files(list_nc_files, path_out_nc):
             if name_var not in list_vars:
                 list_vars.append(name_var)
 
-                out_var = hndl_out_nc.createVariable(name_var, var.datatype, var.dimensions)
+                out_var = hndl_out_nc.createVariable(name_var, var.datatype, var.dimensions, zlib=True)
 
                 # Copy variable attributes
                 out_var.setncatts({k: var.getncattr(k) for k in var.ncattrs()})
