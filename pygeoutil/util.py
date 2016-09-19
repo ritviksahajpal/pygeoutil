@@ -828,14 +828,12 @@ def rename_vars_in_nc(path_nc, dict_rename):
     Returns:
 
     """
-    hndl_nc = open_or_die(path_nc, perm='r+')
-    vars = get_vars_in_nc(path_nc)
+    list_vars = get_vars_in_nc(path_nc)
 
-    for var in vars:
-        if var in dict_rename.keys():
-            hndl_nc.renameVariable(var, dict_rename[var][0])
-
-    hndl_nc.close()
+    with open_or_die(path_nc, perm='r+') as hndl_nc:
+        for var in list_vars:
+            if var in dict_rename.keys() and var != dict_rename[var][0]:
+                hndl_nc.renameVariable(var, dict_rename[var][0])
 
 
 def get_vars_in_nc(path_nc, ignore_var=None):
@@ -848,16 +846,16 @@ def get_vars_in_nc(path_nc, ignore_var=None):
     Returns:
 
     """
-    hndl_nc = open_or_die(path_nc)
     list_vars = []
 
-    for idx, (name_var, var) in enumerate(hndl_nc.variables.iteritems()):
-        if ignore_var is not None:
-            if name_var in ignore_var:
-                continue
+    with open_or_die(path_nc) as hndl_nc:
+        for idx, (name_var, var) in enumerate(hndl_nc.variables.iteritems()):
+            if ignore_var is not None:
+                if name_var in ignore_var:
+                    continue
 
-        # Append variable to list of variables
-        list_vars.append(name_var)
+            # Append variable to list of variables
+            list_vars.append(name_var)
 
     return list_vars
 
@@ -1433,34 +1431,28 @@ def merge_nc_files(list_nc_files, path_out_nc):
     if os.path.exists(path_out_nc):
         return
 
-    hndl_out_nc = open_or_die(path_out_nc, perm='w')
+    with open_or_die(path_out_nc, perm='w') as hndl_out_nc:
+        for fl in list_nc_files:
+            with open_or_die(fl) as hndl_nc:
+                # Copy dimensions
+                for name_dim, dim in hndl_nc.dimensions.iteritems():
+                    if name_dim not in list_dims:
+                        # Append dimension names to list_dims
+                        list_dims.append(name_dim)
+                        hndl_out_nc.createDimension(name_dim, len(dim) if not dim.isunlimited() else None)
 
-    for fl in list_nc_files:
-        hndl_nc = open_or_die(fl)
+                # Copy variables
+                for idx, (name_var, var) in enumerate(hndl_nc.variables.iteritems()):
+                    if name_var not in list_vars:
+                        list_vars.append(name_var)
 
-        # Copy dimensions
-        for name_dim, dim in hndl_nc.dimensions.iteritems():
-            if name_dim not in list_dims:
-                # Append dimension names to list_dims
-                list_dims.append(name_dim)
-                hndl_out_nc.createDimension(name_dim, len(dim) if not dim.isunlimited() else None)
+                        out_var = hndl_out_nc.createVariable(name_var, var.datatype, var.dimensions, zlib=True)
 
-        # Copy variables
-        for idx, (name_var, var) in enumerate(hndl_nc.variables.iteritems()):
-            if name_var not in list_vars:
-                list_vars.append(name_var)
+                        # Copy variable attributes
+                        out_var.setncatts({k: var.getncattr(k) for k in var.ncattrs()})
 
-                out_var = hndl_out_nc.createVariable(name_var, var.datatype, var.dimensions, zlib=True)
-
-                # Copy variable attributes
-                out_var.setncatts({k: var.getncattr(k) for k in var.ncattrs()})
-
-                # Copy variable data
-                out_var[:] = var[:]
-
-        hndl_nc.close()
-
-    hndl_out_nc.close()
+                        # Copy variable data
+                        out_var[:] = var[:]
 
 
 if __name__ == '__main__':
