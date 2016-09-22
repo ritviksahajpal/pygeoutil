@@ -459,10 +459,11 @@ def make_dir_if_missing(d):
     """
     try:
         os.makedirs(d)
-        return d
     except OSError as exception:
         if exception.errno != errno.EEXIST:
             raise
+    finally:
+        return d
 
 
 def delete_files(list_file_paths):
