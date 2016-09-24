@@ -1417,12 +1417,14 @@ def modify_nc_val(path_inp, var, new_val):
         hndl_inp[var][:] = new_val
 
 
-def merge_nc_files(list_nc_files, path_out_nc):
+def merge_nc_files(list_nc_files, path_out_nc, common_var_name='', replace_var_by_file_name=False):
     """
 
     Args:
         list_nc_files:
         path_out_nc:
+        common_var_name:
+        replace_var_by_file_name: If True, then replace common_var_name variable by name of file
 
     Returns:
 
@@ -1437,18 +1439,23 @@ def merge_nc_files(list_nc_files, path_out_nc):
         for fl in list_nc_files:
             with open_or_die(fl) as hndl_nc:
                 # Copy dimensions
-                for name_dim, dim in hndl_nc.dimensions.iteritems():
+                for name_dim, dim in hndl_nc.dimensions.items():
                     if name_dim not in list_dims:
                         # Append dimension names to list_dims
                         list_dims.append(name_dim)
                         hndl_out_nc.createDimension(name_dim, len(dim) if not dim.isunlimited() else None)
 
                 # Copy variables
-                for idx, (name_var, var) in enumerate(hndl_nc.variables.iteritems()):
+                for idx, (name_var, var) in enumerate(hndl_nc.variables.items()):
                     if name_var not in list_vars:
-                        list_vars.append(name_var)
+                        if replace_var_by_file_name and name_var == common_var_name:
+                            new_name_var = os.path.splitext(os.path.basename(fl))[0]
+                            list_vars.append(new_name_var)
 
-                        out_var = hndl_out_nc.createVariable(name_var, var.datatype, var.dimensions, zlib=True)
+                            out_var = hndl_out_nc.createVariable(new_name_var, var.datatype, var.dimensions, zlib=True)
+                        else:
+                            list_vars.append(name_var)
+                            out_var = hndl_out_nc.createVariable(name_var, var.datatype, var.dimensions, zlib=True)
 
                         # Copy variable attributes
                         out_var.setncatts({k: var.getncattr(k) for k in var.ncattrs()})
