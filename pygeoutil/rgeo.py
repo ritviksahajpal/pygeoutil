@@ -1,5 +1,6 @@
 import os
 import pdb
+import rasterio
 import gdal
 import glob
 import gdalconst
@@ -14,7 +15,6 @@ from geopy.exc import GeocoderTimedOut
 from shutil import copyfile
 from functools32 import lru_cache
 import shapefile
-import rasterio
 
 # TODO zonal statistics: https://github.com/perrygeo/python-rasterstats
 # resize and resample:  http://data.naturalcapitalproject.org/pygeoprocessing/api/latest/api/geoprocessing.html
