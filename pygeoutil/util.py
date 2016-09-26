@@ -21,6 +21,23 @@ np.seterr(divide='ignore', invalid='ignore')
 ######################
 # Miscellaneous
 ######################
+def get_key_from_val(dicts, name_val):
+    """
+    Find if name_val is in one of the keys in dicts, return corresponding key
+    Args:
+        dicts:
+        name_val:
+
+    Returns:
+
+    """
+    for key, val in dicts.items():
+        if name_val in val:
+            return key
+    else:
+        raise ValueError(name_val + ' does not exist')
+
+
 def transitions_to_matrix(flat_matrix):
     """
 
@@ -813,7 +830,7 @@ def get_dims_in_nc(path_nc):
     hndl_nc = open_or_die(path_nc)
     list_dims = []
 
-    for name_dim, dim in hndl_nc.dimensions.iteritems():
+    for name_dim, dim in hndl_nc.dimensions.items():
         # Append dimension names to list_dims
         list_dims.append(name_dim)
 
@@ -851,7 +868,7 @@ def get_vars_in_nc(path_nc, ignore_var=None):
     list_vars = []
 
     with open_or_die(path_nc) as hndl_nc:
-        for idx, (name_var, var) in enumerate(hndl_nc.variables.iteritems()):
+        for idx, (name_var, var) in enumerate(hndl_nc.variables.items()):
             if ignore_var is not None:
                 if name_var in ignore_var:
                     continue
@@ -1366,7 +1383,7 @@ def add_nc_vars_to_new_var(path_inp, vars, new_var='tmp'):
         return
 
     with open_or_die(path_inp, perm='r+') as hndl_inp:
-        for idx, (name_var, var) in enumerate(hndl_inp.variables.iteritems()):
+        for idx, (name_var, var) in enumerate(hndl_inp.variables.items()):
             if name_var in vars:
                 out_var = hndl_inp.createVariable(new_var, var.datatype, var.dimensions, zlib=True)
                 out_var.setncatts({k: var.getncattr(k) for k in var.ncattrs()})
@@ -1395,7 +1412,7 @@ def modify_nc_att(path_inp, vars, att_to_modify, new_att_value):
 
     """
     with open_or_die(path_inp, perm='r+') as hndl_inp:
-        for idx, (name_var, var) in enumerate(hndl_inp.variables.iteritems()):
+        for idx, (name_var, var) in enumerate(hndl_inp.variables.items()):
             if name_var in vars:
                 for k in var.ncattrs():
                     if k == att_to_modify:
