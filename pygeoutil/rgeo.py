@@ -350,5 +350,26 @@ def get_grid_cell_area(nrows, ncols):
     return cell_area
 
 
+def get_country_lat_lon_extent(alpha2):
+    """
+
+    Args:
+        alpha2:
+
+    Returns:
+
+    """
+    if alpha2 == 'united_states_of_america':
+        return [-175, -50, 22, 75]
+    elif alpha2 == 'russian_federation':
+        return [22, 179, 35, 83]
+    elif alpha2 == 'china':
+        return [70, 138, 12, 55]
+    elif alpha2 == 'india':
+        return [64, 100, 4, 37]
+    elif alpha2 == 'argentina':
+        return [-80, -50, -16, -64]
+
+
 if __name__ == '__main__':
     pass
