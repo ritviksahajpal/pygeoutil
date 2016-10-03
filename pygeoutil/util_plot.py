@@ -1,6 +1,9 @@
 import math
 import os
+import subprocess
 from PIL import Image
+
+import util
 
 
 def combine_plots_into_one(all_val_imgs, path_out, out_fname, imgs_in_row=10.):
@@ -30,3 +33,16 @@ def combine_plots_into_one(all_val_imgs, path_out, out_fname, imgs_in_row=10.):
         new_im.paste(im, (x_pos, y_pos))
 
     new_im.save(path_out + os.sep + out_fname + '.png', **png_info)
+
+
+def make_movie(list_images, out_path, out_fname):
+    """
+    :param list_images:
+    :param out_path:
+    :param out_fname:
+    :return:
+    """
+    util.make_dir_if_missing(out_path)
+
+    convert_cmd = 'convert -delay 50 -loop 1 '+' '.join(list_images) + ' ' + out_path + os.sep + out_fname
+    subprocess.call(convert_cmd, shell=True)
