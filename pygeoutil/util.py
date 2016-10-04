@@ -15,7 +15,7 @@ import netCDF4
 from skimage.measure import block_reduce
 from tqdm import tqdm
 
-# Ignore divide by 0 errors
+# Ignore divide by 0 errors.
 np.seterr(divide='ignore', invalid='ignore')
 
 
