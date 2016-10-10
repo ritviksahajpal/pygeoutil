@@ -1399,6 +1399,45 @@ def add_nc_vars_to_new_var(path_inp, vars, new_var='tmp'):
         out_var[:] = arr3d[:]
 
 
+def replace_negative_vals_in_nc(path_inp):
+    """
+
+    Args:
+        path_inp:
+
+    Returns:
+
+    """
+
+    with open_or_die(path_inp, perm='r+') as hndl_inp:
+        for idx, (name_var, var) in enumerate(hndl_inp.variables.items()):
+            hndl_inp[name_var][:][hndl_inp[name_var][:] < 0] = 0.0
+
+
+def create_new_var_in_nc(path_inp, example_var, new_var='tmp'):
+    """
+    Add new_var to existing netCDF, fill with 0's and assign it dimension and datatype of existing variable
+    Args:
+        path_inp:
+        vars:
+        new_var:
+
+    Returns:
+
+    """
+    if new_var in get_vars_in_nc(path_inp):
+        return
+
+    with open_or_die(path_inp, perm='r+') as hndl_inp:
+        for idx, (name_var, var) in enumerate(hndl_inp.variables.items()):
+            if name_var in example_var:
+                out_var = hndl_inp.createVariable(new_var, var.datatype, var.dimensions, zlib=True)
+                out_var.setncatts({k: var.getncattr(k) for k in var.ncattrs()})
+                break
+
+        # Assign data to new variable
+        out_var[:] = np.zeros_like(hndl_inp.variables[example_var])
+
 
 def modify_nc_att(path_inp, vars, att_to_modify, new_att_value):
     """
