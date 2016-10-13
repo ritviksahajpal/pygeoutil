@@ -1393,7 +1393,7 @@ def add_nc_vars_to_new_var(path_inp, vars, new_var='tmp'):
         # Create empty array
         arr3d = np.zeros_like(hndl_inp.variables[vars[0]])
         for v in vars:
-            arr3d[:] = arr3d[:] + hndl_inp.variables[v][:]
+            arr3d[:] = arr3d[:].data + hndl_inp.variables[v][:].data
 
         # Assign data to new variable
         out_var[:] = arr3d[:]
