@@ -24,7 +24,7 @@ np.seterr(divide='ignore', invalid='ignore')
 ######################
 def get_key_from_val(dicts, name_val):
     """
-    Find if name_val is in one of the keys in dicts, return corresponding key
+    Find if name_val is in one of the values in dicts, return corresponding key
     Args:
         dicts:
         name_val:
