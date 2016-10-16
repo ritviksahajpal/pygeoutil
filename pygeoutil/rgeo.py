@@ -360,7 +360,7 @@ def get_country_lat_lon_extent(alpha2):
 
     """
     if alpha2 == 'united_states_of_america':
-        return [-130, -60, 25, 50]
+        return [-130, -60, 25, 48]
     elif alpha2 == 'russian_federation':
         return [22, 179, 35, 83]
     elif alpha2 == 'china':
