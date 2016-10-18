@@ -237,7 +237,6 @@ def replace_subset_arr(lats, lons, cell_size, subset_arr):
 
     """
     arr_global = np.zeros((int(180. // cell_size), int(360. // cell_size)))
-    arr_global[:] = np.NaN
 
     latitudes = np.arange(90.0 - cell_size / 2.0, -90.0, -cell_size)
     longitudes = np.arange(-180.0 + cell_size / 2.0, 180.0, cell_size)
