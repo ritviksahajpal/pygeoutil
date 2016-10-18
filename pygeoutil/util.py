@@ -231,7 +231,7 @@ def replace_subset_arr(lats, lons, cell_size, subset_arr):
         lats:
         lons:
         cell_size:
-        subset_arr:
+        subset_arr:.
 
     Returns:
 
