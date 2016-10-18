@@ -237,6 +237,7 @@ def replace_subset_arr(lats, lons, cell_size, subset_arr):
 
     """
     arr_global = np.zeros((int(180. // cell_size), int(360. // cell_size)))
+    arr_global[:] = np.NaN
 
     latitudes = np.arange(90.0 - cell_size / 2.0, -90.0, -cell_size)
     longitudes = np.arange(-180.0 + cell_size / 2.0, 180.0, cell_size)
@@ -261,6 +262,7 @@ def avg_np_arr(data, area_cells=None, block_size=1, func=np.ma.mean):
         data: numpy array (2D)
         area_cells:
         block_size:
+        func:
 
     Returns:
 
