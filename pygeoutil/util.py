@@ -237,6 +237,7 @@ def replace_subset_arr(lats, lons, cell_size, subset_arr):
 
     """
     arr_global = np.zeros((int(180. // cell_size), int(360. // cell_size)))
+    arr_global[:] = np.NaN
 
     latitudes = np.arange(90.0 - cell_size / 2.0, -90.0, -cell_size)
     longitudes = np.arange(-180.0 + cell_size / 2.0, 180.0, cell_size)
@@ -1394,7 +1395,10 @@ def add_nc_vars_to_new_var(path_inp, vars, new_var='tmp'):
         # Create empty array
         arr3d = np.zeros_like(hndl_inp.variables[vars[0]])
         for v in vars:
-            arr3d[:] = arr3d[:].data + hndl_inp.variables[v][:].data
+            try:
+                arr3d[:] = arr3d[:].data + hndl_inp.variables[v][:].data
+            except:
+                pdb.set_trace()
 
         # Assign data to new variable
         out_var[:] = arr3d[:]
