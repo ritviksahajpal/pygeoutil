@@ -6,6 +6,7 @@ import glob
 import gdalconst
 import pandas as pd
 import numpy as np
+import multiprocessing
 import sys
 
 from pygeoprocessing import geoprocessing as gp
@@ -369,6 +370,18 @@ def get_country_lat_lon_extent(alpha2):
         return [64, 100, 4, 37]
     elif alpha2 == 'argentina':
         return [-80, -50, -16, -64]
+
+
+def clip_raster(path_raster, path_mask, path_out_ras, process_pool=multiprocessing.cpu_count() - 1):
+    """
+
+    :param path_raster: Raster
+    :param path_mask: Shapefile
+    :param path_out_ras: Raster
+    :param process_pool: Parallel or not
+    :return:
+    """
+    gp.clip_dataset_uri(path_raster, path_mask, path_out_ras, process_pool=process_pool)
 
 
 if __name__ == '__main__':
