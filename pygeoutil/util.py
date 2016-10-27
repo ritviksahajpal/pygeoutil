@@ -436,6 +436,19 @@ def write_ascii(arr, path_out, name_fl, ncols, nrows, cell_size, xllcorner=-180,
 ######################
 # Managing file system
 ######################
+def get_immediate_subdirectories(path_base_dir):
+    """
+
+    Args:
+        path_base_dir:
+
+    Returns:
+
+    """
+    return [name for name in os.listdir(path_base_dir)
+            if os.path.isdir(os.path.join(path_base_dir, name))]
+
+
 def get_modification_date(filename):
     """
     http://stackoverflow.com/questions/237079/how-to-get-file-creation-modification-date-times-in-python
