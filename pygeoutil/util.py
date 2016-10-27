@@ -441,6 +441,7 @@ def all_files_under(path, match_str=None):
     Iterates through all files that are under the given path.
     Args:
         path:
+        match_str:
 
     Returns:
 
@@ -452,8 +453,8 @@ def all_files_under(path, match_str=None):
             if match_str is not None:
                 if match_str in filename:
                     dirs.append(os.path.join(cur_path, filename))
-                else:
-                    dirs.append(os.path.join(cur_path, filename))
+            else:
+                dirs.append(os.path.join(cur_path, filename))
 
     return dirs
 
