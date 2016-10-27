@@ -436,7 +436,7 @@ def write_ascii(arr, path_out, name_fl, ncols, nrows, cell_size, xllcorner=-180,
 ######################
 # Managing file system
 ######################
-def all_files_under(path):
+def all_files_under(path, match_str=None):
     """
     Iterates through all files that are under the given path.
     Args:
@@ -449,7 +449,11 @@ def all_files_under(path):
 
     for cur_path, dirnames, filenames in os.walk(path):
         for filename in filenames:
-            dirs.append(os.path.join(cur_path, filename))
+            if match_str is not None:
+                if match_str in filename:
+                    dirs.append(os.path.join(cur_path, filename))
+                else:
+                    dirs.append(os.path.join(cur_path, filename))
 
     return dirs
 
