@@ -436,6 +436,20 @@ def write_ascii(arr, path_out, name_fl, ncols, nrows, cell_size, xllcorner=-180,
 ######################
 # Managing file system
 ######################
+def all_files_under(path):
+    """
+    Iterates through all files that are under the given path.
+    Args:
+        path:
+
+    Returns:
+
+    """
+    for cur_path, dirnames, filenames in os.walk(path):
+        for filename in filenames:
+            yield os.path.join(cur_path, filename)
+
+
 def get_immediate_subdirectories(path_base_dir):
     """
 
