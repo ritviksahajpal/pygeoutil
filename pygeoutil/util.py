@@ -445,9 +445,13 @@ def all_files_under(path):
     Returns:
 
     """
+    dirs = []
+
     for cur_path, dirnames, filenames in os.walk(path):
         for filename in filenames:
-            yield os.path.join(cur_path, filename)
+            dirs.append(os.path.join(cur_path, filename))
+
+    return dirs
 
 
 def get_immediate_subdirectories(path_base_dir):
