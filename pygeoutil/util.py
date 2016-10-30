@@ -1036,26 +1036,25 @@ def convert_ascii_nc(asc_data, out_path, num_lats, num_lons, skiprows=0, var_nam
     fl_name = os.path.basename(out_path).split('.')[0]
     out_nc = path + os.sep + fl_name + '.nc'
 
-    nc_data = netCDF4.Dataset(out_nc, 'w', format='NETCDF4')
-    nc_data.description = desc
+    with open_or_die(out_nc, perm='w', format='NETCDF4') as nc_data:
+        nc_data.description = desc
 
-    # dimensions
-    nc_data.createDimension('lat', asc_data.shape[0])
-    nc_data.createDimension('lon', asc_data.shape[1])
+        # dimensions
+        nc_data.createDimension('lat', asc_data.shape[0])
+        nc_data.createDimension('lon', asc_data.shape[1])
 
-    # Populate and output nc file
-    latitudes = nc_data.createVariable('lat', 'f4', ('lat',), zlib=True)
-    longitudes = nc_data.createVariable('lon', 'f4', ('lon',), zlib=True)
-    data = nc_data.createVariable(var_name, 'f4', ('lat', 'lon',), fill_value=np.nan, zlib=True)
+        # Populate and output nc file
+        latitudes = nc_data.createVariable('lat', 'f4', ('lat',), zlib=True)
+        longitudes = nc_data.createVariable('lon', 'f4', ('lon',), zlib=True)
+        data = nc_data.createVariable(var_name, 'f4', ('lat', 'lon',), fill_value=np.nan, zlib=True)
 
-    data.units = ''
+        data.units = ''
 
-    # set the variables we know first
-    latitudes[:] = np.arange(90.0 - fl_res/2.0, -90.0, -fl_res)
-    longitudes[:] = np.arange(-180.0 + fl_res/2.0, 180.0,  fl_res)
-    data[:, :] = asc_data[:, :]
+        # set the variables we know first
+        latitudes[:] = np.arange(90.0 - fl_res/2.0, -90.0, -fl_res)
+        longitudes[:] = np.arange(-180.0 + fl_res/2.0, 180.0,  fl_res)
+        data[:, :] = asc_data[:, :]
 
-    nc_data.close()
     return out_nc
 
 
