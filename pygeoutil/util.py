@@ -920,7 +920,7 @@ def get_vars_in_nc(path_nc, ignore_var=None):
     return list_vars
 
 
-def create_nc_var(hndl_nc, var, name_var, dims):
+def create_nc_var(hndl_nc, var, name_var, dims, fill_val=np.NaN):
     """
 
     Args:
@@ -928,13 +928,14 @@ def create_nc_var(hndl_nc, var, name_var, dims):
         var:
         name_var:
         dims:
+        fill_val:
 
     Returns:
 
     """
     dtype = 'f8' if var.dtype == 'datetime64[ns]' else var.dtype
 
-    out_var_nc = hndl_nc.createVariable(name_var, dtype, dims, zlib=True)
+    out_var_nc = hndl_nc.createVariable(name_var, dtype, dims, zlib=True, fill_value=fill_val)
     out_var_nc.setncatts({k: var.getncattr(k) for k in var.ncattrs()})
 
     return out_var_nc
