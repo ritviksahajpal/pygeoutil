@@ -1408,7 +1408,7 @@ def modify_desc_in_nc(path_nc, val_att):
             hndl_nc.description = val_att
 
 
-def add_nc_vars_to_new_var(path_inp, vars, new_var='tmp'):
+def add_nc_vars_to_new_var(path_inp, vars, new_var='tmp', fill_val=0.0):
     """
 
     Args:
@@ -1425,7 +1425,7 @@ def add_nc_vars_to_new_var(path_inp, vars, new_var='tmp'):
     with open_or_die(path_inp, perm='r+') as hndl_inp:
         for idx, (name_var, var) in enumerate(hndl_inp.variables.items()):
             if name_var in vars:
-                out_var = hndl_inp.createVariable(new_var, var.datatype, var.dimensions, zlib=True)
+                out_var = hndl_inp.createVariable(new_var, var.datatype, var.dimensions, zlib=True, fill_value=fill_val)
                 out_var.setncatts({k: var.getncattr(k) for k in var.ncattrs()})
                 break
 
