@@ -1514,7 +1514,7 @@ def modify_nc_val(path_inp, var, new_val):
         hndl_inp[var][:] = new_val
 
 
-def merge_nc_files(list_nc_files, path_out_nc, common_var_name='', replace_var_by_file_name=False):
+def merge_nc_files(list_nc_files, path_out_nc, common_var_name='', replace_var_by_file_name=False, fill_val=np.NaN):
     """
 
     Args:
@@ -1549,10 +1549,12 @@ def merge_nc_files(list_nc_files, path_out_nc, common_var_name='', replace_var_b
                             new_name_var = os.path.splitext(os.path.basename(fl))[0]
                             list_vars.append(new_name_var)
 
-                            out_var = hndl_out_nc.createVariable(new_name_var, var.datatype, var.dimensions, zlib=True)
+                            out_var = hndl_out_nc.createVariable(new_name_var, var.datatype, var.dimensions, zlib=True,
+                                                                 fill_value=fill_val)
                         else:
                             list_vars.append(name_var)
-                            out_var = hndl_out_nc.createVariable(name_var, var.datatype, var.dimensions, zlib=True)
+                            out_var = hndl_out_nc.createVariable(name_var, var.datatype, var.dimensions, zlib=True,
+                                                                 fill_value=fill_val)
 
                         # Copy variable attributes
                         out_var.setncatts({k: var.getncattr(k) for k in var.ncattrs()})
