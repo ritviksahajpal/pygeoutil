@@ -232,7 +232,7 @@ def replace_subset_arr(lats, lons, cell_size, subset_arr, default_val=np.NaN):
         lons:
         cell_size:
         subset_arr:
-        default_val:
+        default_val:.
 
     Returns:
 
