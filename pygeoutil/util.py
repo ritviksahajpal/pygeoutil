@@ -1011,7 +1011,7 @@ def convert_arr_to_nc(arr, var_name, lat, lon, out_nc_path, tme=''):
     onc.close()
 
 
-def convert_ascii_nc(asc_data, out_path, num_lats, num_lons, skiprows=0, var_name='data', desc='netCDF'):
+def convert_ascii_nc(asc_data, out_path, num_lats, num_lons, skiprows=0, var_name='data', desc='netCDF', flipud=False):
     """
     Convert input ascii file to netCDF file. Compute shape from ascii file
     Assumes 2D file, no time dimension
@@ -1023,6 +1023,7 @@ def convert_ascii_nc(asc_data, out_path, num_lats, num_lons, skiprows=0, var_nam
         skiprows:
         var_name:
         desc: Description of data
+        flipud:
 
     Returns:
         Path of netCDF file that was created, side-effect: create netCDF file
@@ -1056,7 +1057,7 @@ def convert_ascii_nc(asc_data, out_path, num_lats, num_lons, skiprows=0, var_nam
         # set the variables we know first
         latitudes[:] = np.arange(90.0 - fl_res/2.0, -90.0, -fl_res)
         longitudes[:] = np.arange(-180.0 + fl_res/2.0, 180.0,  fl_res)
-        data[:, :] = asc_data[:, :]
+        data[:, :] = asc_data[:, :] if not flipud else np.flipud(asc_data[:, :])
 
     return out_nc
 
@@ -1433,8 +1434,10 @@ def add_nc_vars_to_new_var(path_inp, vars, new_var='tmp', fill_val=0.0):
         # Create empty array
         arr3d = np.zeros_like(hndl_inp.variables[vars[0]])
         for v in vars:
-            arr3d[:] = arr3d[:] + hndl_inp.variables[v][:].data
-
+            if isinstance(hndl_inp.variables[v][:], np.ma.masked_array):
+                arr3d[:] = arr3d[:] + hndl_inp.variables[v][:].data
+            else:
+                arr3d[:] = arr3d[:] + hndl_inp.variables[v][:]
         # Assign data to new variable
         out_var[:] = arr3d[:]
 
