@@ -16,6 +16,8 @@ from geopy.exc import GeocoderTimedOut
 from shutil import copyfile
 from functools32 import lru_cache
 import shapefile
+import fiona
+from shapely.geometry import mapping, shape
 
 # TODO zonal statistics: https://github.com/perrygeo/python-rasterstats
 # resize and resample:  http://data.naturalcapitalproject.org/pygeoprocessing/api/latest/api/geoprocessing.html
@@ -382,6 +384,30 @@ def clip_raster(path_raster, path_mask, path_out_ras, process_pool=multiprocessi
     :return:
     """
     gp.clip_dataset_uri(path_raster, path_mask, path_out_ras, process_pool=process_pool)
+
+
+def select(path_inp, name_col, val, path_out):
+    """
+    Select from shapefile by attribute
+    Replacement of ArcGIS: http://pro.arcgis.com/en/pro-app/tool-reference/data-management/select-layer-by-attribute.htm
+    Args:
+        path_inp:
+        name_col:
+        val:
+        path_out:
+
+    Returns:
+
+    """
+
+    with fiona.open(path_inp) as src:
+        with fiona.open(path_out, 'w', **src.meta) as sink:
+            filtered = filter(lambda f: f['properties'][name_col] == val, src)
+
+            geom = shape(filtered[0]['geometry'])
+            filtered[0]['geometry'] = mapping(geom)
+
+            sink.write(filtered[0])
 
 
 if __name__ == '__main__':
