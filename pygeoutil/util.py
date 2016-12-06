@@ -5,6 +5,7 @@ import pdb
 import datetime
 import sys
 import calendar
+import subprocess
 
 import rgeo
 
@@ -692,6 +693,26 @@ def get_ascii_plot_parameters(asc, step_length=10.0):
 ######################
 # netCDF
 ######################
+def extract_nc_var(path_inp, name_var, path_out):
+    """
+
+    Args:
+        path_inp: Path to input netCDF file
+        name_var: Name of variable to extract
+        path_out: Path to output netCDF file containing only variable 'name_var'
+
+    Returns:
+
+    """
+    ncks_cmd = 'ncks -v '
+
+    try:
+        subprocess.check_output(ncks_cmd + name_var + ' ' + path_inp + ' ' + path_out)
+    except OSError:
+        print('ncks -v failed')
+        sys.exit(0)
+
+
 def get_nc_var4d(hndl_nc, var, year, pos=0, use_xarray=False):
     """
 
