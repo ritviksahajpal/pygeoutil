@@ -693,6 +693,28 @@ def get_ascii_plot_parameters(asc, step_length=10.0):
 ######################
 # netCDF
 ######################
+def extract_nc_hyperslab(path_inp, name_hyperslab, name_var, idx_hyperslab, path_out):
+    """
+    http://stackoverflow.com/questions/40981580/extracting-variable-from-group-in-netcdf/41000509#41000509
+    Args:
+        path_inp:
+        name_hyperslab:
+        name_var:
+        idx_hyperslab:
+        path_out:
+
+    Returns:
+
+    """
+    ncks_cmd = 'ncks -d ' + name_hyperslab + ',' + str(idx_hyperslab)
+
+    try:
+        subprocess.check_output(ncks_cmd + ' -v ' + name_var + ' ' + path_inp + ' ' + path_out)
+    except OSError:
+        print('ncks -d failed')
+        sys.exit(0)
+
+
 def extract_nc_var(path_inp, name_var, path_out):
     """
 
