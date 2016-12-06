@@ -706,12 +706,12 @@ def extract_nc_hyperslab(path_inp, name_hyperslab, name_var, idx_hyperslab, path
     Returns:
 
     """
-    ncks_cmd = 'ncks -d ' + name_hyperslab + ',' + str(idx_hyperslab)
+    ncks_cmd = 'ncks -O -d ' + name_hyperslab + ',' + str(idx_hyperslab)
 
     try:
         subprocess.check_output(ncks_cmd + ' -v ' + name_var + ' ' + path_inp + ' ' + path_out)
     except OSError:
-        print('ncks -d failed')
+        print('ncks -O -d failed')
         sys.exit(0)
 
 
@@ -726,14 +726,73 @@ def extract_nc_var(path_inp, name_var, path_out):
     Returns:
 
     """
-    ncks_cmd = 'ncks -v '
+    ncks_cmd = 'ncks -O -v '
 
     try:
         subprocess.check_output(ncks_cmd + name_var + ' ' + path_inp + ' ' + path_out)
     except OSError:
-        print('ncks -v failed')
+        print('ncks -O -v failed')
         sys.exit(0)
 
+
+def delete_nc_dim(path_inp, name_dim, path_out):
+    """
+    Deletes dimension from netCDF
+    Args:
+        path_inp:
+        name_dim:
+        path_out:
+
+    Returns:
+
+    """
+    ncwa_cmd = 'ncwa -O -a '
+
+    try:
+        subprocess.check_output(ncwa_cmd + name_dim + ' ' + path_inp + ' ' + path_out)
+    except OSError:
+        print('ncwa -O -a failed')
+
+
+def append_nc_files(list_inp_nc, path_out_nc):
+    """
+
+    Args:
+        list_inp_nc:
+        path_out_nc:
+
+    Returns:
+
+    """
+    # Copy first netCDF file
+    try:
+        subprocess.check_output('nccopy ' + list_inp_nc[0] + ' ' + path_out_nc)
+    except OSError:
+        print('nccopy -O failed')
+
+    # Append remaining files to path_out_nc
+    ncks_cmd = 'ncks -A '
+
+    try:
+        for idx, fl in enumerate(list_inp_nc[1:]):
+            print idx, fl
+            subprocess.check_output(ncks_cmd + fl + ' ' + path_out_nc)
+    except OSError:
+        print('ncks -A failed')
+
+
+def create_link_nc(path_inp_nc, var_to_use, path_out_nc, all_zeros=False):
+    """
+
+    Args:
+        path_inp_nc:
+        var_to_use:
+        path_out_nc:
+        all_zeros:
+
+    Returns:
+
+    """
 
 def get_nc_var4d(hndl_nc, var, year, pos=0, use_xarray=False):
     """
