@@ -746,7 +746,7 @@ def delete_nc_dim(path_inp, name_dim, path_out):
     Returns:
 
     """
-    ncwa_cmd = 'ncwa -O -a '
+    ncwa_cmd = 'ncwa -a '
 
     try:
         subprocess.check_output(ncwa_cmd + name_dim + ' ' + path_inp + ' ' + path_out)
@@ -775,24 +775,43 @@ def append_nc_files(list_inp_nc, path_out_nc):
 
     try:
         for idx, fl in enumerate(list_inp_nc[1:]):
-            print idx, fl
             subprocess.check_output(ncks_cmd + fl + ' ' + path_out_nc)
     except OSError:
         print('ncks -A failed')
 
 
-def create_link_nc(path_inp_nc, var_to_use, path_out_nc, all_zeros=False):
+def create_like_nc(path_inp_nc, var_to_use, path_out_nc, all_zeros=False):
     """
-
+    Create a netCDF with same dimensions as another netCDF. Either fill it with all zeros or var_to_use
     Args:
         path_inp_nc:
         var_to_use:
         path_out_nc:
-        all_zeros:
+        all_zeros: if True, then create netCDF with all 0's
 
     Returns:
 
     """
+    list_dims = []
+    with open_or_die(path_inp_nc) as dsin, open_or_die(path_out_nc, 'w') as dsout:
+        # Copy dimensions
+        for name_dim, dim in dsin.dimensions.items():
+            dsout.createDimension(name_dim, len(dim) if not dim.isunlimited() else None)
+            list_dims.append(name_dim)
+
+        # Copy var_to_use variable
+        for idx, (name_var, var) in enumerate(dsin.variables.items()):
+            if name_var == var_to_use or name_var in list_dims:
+                out_var = dsout.createVariable(name_var, var.datatype, var.dimensions)
+
+                # Copy variable attributes
+                out_var.setncatts({k: var.getncattr(k) for k in var.ncattrs()})
+
+                if all_zeros and name_var not in list_dims:
+                    out_var[:] = 0.0
+                else:
+                    out_var[:] = var[:]
+
 
 def get_nc_var4d(hndl_nc, var, year, pos=0, use_xarray=False):
     """
@@ -1660,7 +1679,8 @@ def merge_nc_files(list_nc_files, path_out_nc, common_var_name='', mask_val=np.N
                         else:
                             # Dimensions handles here
                             list_vars.append(name_var)
-                            out_var = hndl_out_nc.createVariable(name_var, var.datatype, var.dimensions, zlib=True)
+                            out_var = hndl_out_nc.createVariable(name_var, var.datatype, var.dimensions, zlib=True,
+                                                                 fill_value=default_val)
 
                         # Copy variable attributes
                         # out_var.setncatts({k: var.getncattr(k) for k in var.ncattrs()})
