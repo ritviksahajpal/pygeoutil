@@ -709,8 +709,10 @@ def extract_nc_hyperslab(path_inp, name_hyperslab, name_var, idx_hyperslab, path
     ncks_cmd = 'ncks -O -d ' + name_hyperslab + ',' + str(idx_hyperslab)
 
     try:
-        subprocess.check_output(ncks_cmd + ' -v ' + name_var + ' ' + path_inp + ' ' + path_out)
-    except OSError:
+        subprocess.check_output(ncks_cmd + ' -v ' + name_var + ' ' + path_inp + ' ' + path_out,
+                            stderr=subprocess.STDOUT,
+                            shell=True)
+    except:
         print('ncks -O -d failed')
         sys.exit(0)
 
@@ -749,7 +751,9 @@ def delete_nc_dim(path_inp, name_dim, path_out):
     ncwa_cmd = 'ncwa -a '
 
     try:
-        subprocess.check_output(ncwa_cmd + name_dim + ' ' + path_inp + ' ' + path_out)
+        subprocess.check_output(ncwa_cmd + name_dim + ' ' + path_inp + ' ' + path_out,
+                                stderr=subprocess.STDOUT,
+                                shell=True)
     except OSError:
         print('ncwa -O -a failed')
 
