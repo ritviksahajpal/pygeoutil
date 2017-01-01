@@ -223,6 +223,35 @@ def sliding_mean(data_array, window=5):
 
 
 ######################
+# pandas
+######################
+def get_df_idx(df, freq='M'):
+    """
+    Return dataframe index (month, week, year, or day)
+    Args:
+        df: input dataframe
+        freq: 'M': month, 'D': day, 'Y': year, 'W': week
+
+    Returns:
+
+    """
+    # Check if dataframe index is of dattetime type
+    if type(df.index) != pd.tslib.Timestamp:
+        raise IndexError('Dataframe does not have a datetime index')
+    else:
+        if freq == 'M':
+            return df.index.month
+        elif freq == 'D':
+            return df.index.day
+        elif freq == 'W':
+            return df.index.week
+        elif freq == 'Y':
+            return df.index.year
+        else:
+            raise ValueError('Incorrect value of time-step frequency')
+
+
+######################
 # numpy array ops
 ######################
 def replace_subset_arr(lats, lons, cell_size, subset_arr, default_val=np.NaN):
