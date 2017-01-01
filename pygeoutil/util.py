@@ -225,6 +225,28 @@ def sliding_mean(data_array, window=5):
 ######################
 # pandas
 ######################
+def get_ts_name(val, freq='M'):
+    """
+    Get name of time stamp e.g. 1 is January, if freq='M'
+    Args:
+        val:
+        freq:
+
+    Returns:
+
+    """
+    if freq == 'M':
+        return calendar.month_abbr[val]
+    elif freq == 'W':
+        return str(val)
+    elif freq == 'D':
+        return str(val)
+    elif freq == 'Y':
+        return str(val)
+    else:
+        raise ValueError('Incorrect value of time-step frequency')
+
+
 def get_df_idx(df, freq='M'):
     """
     Return dataframe index (month, week, year, or day)
@@ -236,7 +258,7 @@ def get_df_idx(df, freq='M'):
 
     """
     # Check if dataframe index is of dattetime type
-    if type(df.index) != pd.tslib.Timestamp or type(df.index) != pd.tseries.index.DatetimeIndex:
+    if type(df.index) != pd.tslib.Timestamp and type(df.index) != pd.tseries.index.DatetimeIndex:
         raise IndexError('Dataframe does not have a datetime index')
     else:
         if freq == 'M':
