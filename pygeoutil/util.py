@@ -236,7 +236,7 @@ def get_df_idx(df, freq='M'):
 
     """
     # Check if dataframe index is of dattetime type
-    if type(df.index) != pd.tslib.Timestamp:
+    if type(df.index) != pd.tslib.Timestamp or type(df.index) != pd.tseries.index.DatetimeIndex:
         raise IndexError('Dataframe does not have a datetime index')
     else:
         if freq == 'M':
