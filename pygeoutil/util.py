@@ -1732,7 +1732,7 @@ def merge_nc_files(list_nc_files, path_out_nc, common_var_name='', mask_val=np.N
                             out_var = hndl_out_nc.createVariable(new_name_var, var.datatype, var.dimensions, zlib=True,
                                                                  fill_value=default_val)
                         else:
-                            # Dimensions handles here
+                            # Dimensions handled here
                             list_vars.append(name_var)
                             out_var = hndl_out_nc.createVariable(name_var, var.datatype, var.dimensions, zlib=True,
                                                                  fill_value=default_val)
@@ -1741,7 +1741,10 @@ def merge_nc_files(list_nc_files, path_out_nc, common_var_name='', mask_val=np.N
                         # out_var.setncatts({k: var.getncattr(k) for k in var.ncattrs()})
 
                         # Copy variable data
-                        out_var[:] = var[:]
+                        if np.isnan(mask_val) and len(var.shape) >= 2:
+                            out_var[:] = np.nan_to_num(var)
+                        else:
+                            out_var[:] = var[:]
 
 
 if __name__ == '__main__':
