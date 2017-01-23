@@ -671,7 +671,7 @@ def iter_loadtxt(filename, delimiter=',', skiprows=0, dtype=float):
 
 
 def open_or_die(path_file, perm='r', csv_header=0, skiprows=0, delimiter=' ', mask_val=-9999.0, use_xarray=False,
-                format=''):
+                format='', **kwargs):
     """
     Open file or quit gracefully
     Args:
@@ -707,7 +707,8 @@ def open_or_die(path_file, perm='r', csv_header=0, skiprows=0, delimiter=' ', ma
             data = np.ma.masked_values(data, mask_val)
             return data
         elif os.path.splitext(path_file)[1] == '.nc' and use_xarray:
-            merge_nc_files(path_file)
+            hndl = xr.open_dataset(path_file, **kwargs)
+            return hndl
         else:
             raise IOError('Invalid file type ' + os.path.splitext(path_file)[1])
             sys.exit(0)
@@ -799,7 +800,7 @@ def delete_nc_dim(path_inp, name_dim, path_out):
     Returns:
 
     """
-    ncwa_cmd = 'ncwa -a '
+    ncwa_cmd = 'ncwa -O -a '
 
     try:
         subprocess.check_output(ncwa_cmd + name_dim + ' ' + path_inp + ' ' + path_out,
@@ -1586,12 +1587,12 @@ def modify_desc_in_nc(path_nc, val_att):
             hndl_nc.description = val_att
 
 
-def add_nc_vars_to_new_var(path_inp, vars, new_var='tmp', fill_val=0.0):
+def add_nc_vars_to_new_var(path_inp, _vars, new_var='tmp', fill_val=0.0):
     """
 
     Args:
         path_inp:
-        vars:
+        _vars:
         new_var:
 
     Returns:
@@ -1602,14 +1603,14 @@ def add_nc_vars_to_new_var(path_inp, vars, new_var='tmp', fill_val=0.0):
 
     with open_or_die(path_inp, perm='r+') as hndl_inp:
         for idx, (name_var, var) in enumerate(hndl_inp.variables.items()):
-            if name_var in vars:
-                out_var = hndl_inp.createVariable(new_var, var.datatype, var.dimensions, zlib=True, fill_value=fill_val)
+            if name_var in _vars:
+                out_var = hndl_inp.createVariable(new_var, var.datatype, var.dimensions, zlib=True, fill_value=np.NaN)
                 out_var.setncatts({k: var.getncattr(k) for k in var.ncattrs()})
                 break
 
         # Create empty array
-        arr3d = np.zeros_like(hndl_inp.variables[vars[0]])
-        for v in vars:
+        arr3d = np.zeros_like(hndl_inp.variables[_vars[0]])
+        for v in _vars:
             if isinstance(hndl_inp.variables[v][:], np.ma.masked_array):
                 arr3d[:] = arr3d[:] + hndl_inp.variables[v][:].data
             else:
@@ -1693,58 +1694,44 @@ def modify_nc_val(path_inp, var, new_val):
         hndl_inp[var][:] = new_val
 
 
-def merge_nc_files(list_nc_files, path_out_nc, common_var_name='', mask_val=np.NaN, default_val=np.NaN,
-                   replace_var_by_file_name=False):
+def merge_nc_files(all_nc_files, path_out_nc, common_var_name=None, replace_var_by_file_name=True, **kwargs):
     """
-
+    Merge multiple netCDF files. If each file has variale with same name then rename to name of netCDF file
     Args:
-        list_nc_files:
-        path_out_nc:
-        common_var_name:
-        replace_var_by_file_name: If True, then replace common_var_name variable by name of file
+        all_nc_files: list of paths to all netCDF files
+        path_out_nc: path of output netCDF file that will be created
+        common_var_name: optional, name of common variable that needs to be renamed
+        replace_var_by_file_name: optional, boolean
+        **kwargs:
 
     Returns:
 
     """
-    list_dims = []  # List of dimensions in input netCDF file
-    list_vars = []
-
     if os.path.isfile(path_out_nc):
         return
 
-    with open_or_die(path_out_nc, perm='w') as hndl_out_nc:
-        for fl in list_nc_files:
-            with open_or_die(fl) as hndl_nc:
-                # Copy dimensions
-                for name_dim, dim in hndl_nc.dimensions.items():
-                    if name_dim not in list_dims:
-                        # Append dimension names to list_dims
-                        list_dims.append(name_dim)
-                        hndl_out_nc.createDimension(name_dim, len(dim) if not dim.isunlimited() else None)
+    list_fls = []  # List of netCDF files that need to be merged
+    dict_zlib = {}  # Dictionary containing zlib information for each variable
 
-                # Copy variables
-                for idx, (name_var, var) in enumerate(hndl_nc.variables.items()):
-                    if name_var not in list_vars:
-                        if replace_var_by_file_name and name_var == common_var_name:
-                            new_name_var = os.path.splitext(os.path.basename(fl))[0]
-                            list_vars.append(new_name_var)
+    # Loop over all input files, rename if needed and then merge
+    for fl in all_nc_files:
+        _fl = open_or_die(fl, use_xarray=True, **kwargs)
 
-                            out_var = hndl_out_nc.createVariable(new_name_var, var.datatype, var.dimensions, zlib=True,
-                                                                 fill_value=default_val)
-                        else:
-                            # Dimensions handled here
-                            list_vars.append(name_var)
-                            out_var = hndl_out_nc.createVariable(name_var, var.datatype, var.dimensions, zlib=True,
-                                                                 fill_value=default_val)
+        if replace_var_by_file_name:
+            _new_name = os.path.splitext(os.path.basename(fl))[0]
+            _fl = _fl.rename({common_var_name: _new_name})  # Rename if all netCDF files have same variable name
 
-                        # Copy variable attributes
-                        # out_var.setncatts({k: var.getncattr(k) for k in var.ncattrs()})
+            dict_zlib[_new_name] = {'zlib': True}  # Add to encoding dictionary
+            list_fls.append(_fl)
+        else:
+            list_fls = all_nc_files
 
-                        # Copy variable data
-                        if np.isnan(mask_val) and len(var.shape) >= 2:
-                            out_var[:] = np.nan_to_num(var)
-                        else:
-                            out_var[:] = var[:]
+    if replace_var_by_file_name:
+        _merged = xr.merge(list_fls)
+    else:
+        _merged = xr.merge([xr.open_dataset(_fl, **kwargs) for _fl in list_fls])
+
+    _merged.to_netcdf(path_out_nc, mode='w', encoding=dict_zlib)
 
 
 if __name__ == '__main__':
