@@ -9,7 +9,6 @@ import numpy as np
 import multiprocessing
 import sys
 
-from pygeoprocessing import geoprocessing as gp
 from geopy.geocoders import Nominatim
 import geocoder
 from geopy.exc import GeocoderTimedOut
@@ -95,6 +94,7 @@ def get_properties(path_ds, name_property):
     Returns:
 
     """
+    from pygeoprocessing import geoprocessing as gp
     dict_properties = gp.get_raster_properties_uri(path_ds)
 
     return dict_properties[name_property]
@@ -110,6 +110,7 @@ def get_values_rat_column(path_ds, name_col='Value'):
     Returns:
 
     """
+    from pygeoprocessing import geoprocessing as gp
     dict_values = gp.get_rat_as_dictionary_uri(path_ds)
 
     name_key = [s for s in dict_values.keys() if '.' + name_col in s]
@@ -130,6 +131,7 @@ def lookup(path_ds, path_out_ds, from_field='Value', to_field='', overwrite=True
     Returns:
 
     """
+    from pygeoprocessing import geoprocessing as gp
     val_from = get_values_rat_column(path_ds, name_col=from_field)
     val_to = get_values_rat_column(path_ds, name_col=to_field)
 
@@ -383,6 +385,7 @@ def clip_raster(path_raster, path_mask, path_out_ras, process_pool=multiprocessi
     :param process_pool: Parallel or not
     :return:
     """
+    from pygeoprocessing import geoprocessing as gp
     gp.clip_dataset_uri(path_raster, path_mask, path_out_ras, process_pool=process_pool)
 
 
