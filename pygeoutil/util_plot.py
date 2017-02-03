@@ -3,7 +3,7 @@ import os
 import subprocess
 from PIL import Image
 
-import util
+from . import util
 
 
 def combine_plots_into_one(all_val_imgs, path_out, out_fname, imgs_in_row=10.):

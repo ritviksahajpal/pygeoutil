@@ -13,7 +13,7 @@ from geopy.geocoders import Nominatim
 import geocoder
 from geopy.exc import GeocoderTimedOut
 from shutil import copyfile
-from functools32 import lru_cache
+from functools import lru_cache
 import shapefile
 import fiona
 from shapely.geometry import mapping, shape
@@ -215,10 +215,10 @@ def get_latlon_location(loc):
         location = geolocator.geocode(loc, timeout=5)
         lat = location.latitude
         lon = location.longitude
-    except Exception, e:
+    except Exception as e:
         # TODO Be smarter about catching exceptions here, needs internet connection to work
         # Default behaviour is to exit
-        print 'Geolocator not working: ' + loc + ' ' + str(e)
+        print('Geolocator not working: ' + loc + ' ' + str(e))
         return 0.0, 0.0  # Equator is default
 
     return lat, lon

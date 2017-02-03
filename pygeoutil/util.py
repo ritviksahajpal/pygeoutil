@@ -7,7 +7,7 @@ import sys
 import calendar
 import subprocess
 
-import rgeo
+from . import rgeo
 
 import xarray as xr
 import numpy as np
@@ -693,7 +693,10 @@ def open_or_die(path_file, perm='r', csv_header=0, skiprows=0, delimiter=' ', ma
             hndl = netCDF4.Dataset(path_file, perm, format='NETCDF4')
             return hndl
         elif os.path.splitext(path_file)[1] == '.csv':
-            df = pd.read_csv(path_file, header=csv_header)
+            import chardet
+            with open(path_file, 'rb') as f:
+                result = chardet.detect(f.read())  # or readline if the file is large
+            df = pd.read_csv(path_file, header=csv_header, encoding=result['encoding'])
             return df
         elif os.path.splitext(path_file)[1] == '.xlsx' or os.path.splitext(path_file)[1] == '.xls':
             df = pd.ExcelFile(path_file, header=csv_header)
