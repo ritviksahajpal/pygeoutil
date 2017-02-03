@@ -3,11 +3,12 @@ import pdb
 import rasterio
 import gdal
 import glob
-import gdalconst
+
 import pandas as pd
 import numpy as np
 import multiprocessing
 import sys
+from . import ggeo
 
 from geopy.geocoders import Nominatim
 import geocoder
@@ -33,57 +34,6 @@ from shapely.geometry import mapping, shape
 # mosaic
 
 
-def get_dataset_type(path_ds):
-    """
-    Return dataset type e.g. GeoTiff
-    Args:
-        path_ds:
-
-    Returns:
-
-    """
-    dataset = gdal.Open(path_ds, gdalconst.GA_ReadOnly)
-    dataset_type = dataset.GetDriver().LongName
-
-    dataset = None  # Close dataset
-
-    return dataset_type
-
-
-def get_dataset_datatype(path_ds):
-    """
-    Return datatype of dataset e.g. GDT_UInt32
-    Args:
-        path_ds:
-
-    Returns:
-
-    """
-    dataset = gdal.Open(path_ds, gdalconst.GA_ReadOnly)
-
-    band = dataset.GetRasterBand(1)
-    bandtype = gdal.GetDataTypeName(band.DataType)  # UInt32
-
-    dataset = None  # Close dataset
-
-    if bandtype == 'UInt32':
-        return gdalconst.GDT_UInt32
-    elif bandtype == 'UInt16':
-        return gdalconst.GDT_UInt16
-    elif bandtype == 'Float32':
-        return gdalconst.GDT_Float32
-    elif bandtype == 'Float64':
-        return gdalconst.GDT_Float64
-    elif bandtype == 'Int16':
-        return gdalconst.GDT_Int16
-    elif bandtype == 'Int32':
-        return gdalconst.GDT_Int32
-    elif bandtype == 'Unknown':
-        return gdalconst.GDT_Unknown
-    else:
-        return gdalconst.GDT_UInt32
-
-
 def get_properties(path_ds, name_property):
     """
 
@@ -94,8 +44,7 @@ def get_properties(path_ds, name_property):
     Returns:
 
     """
-    from pygeoprocessing import geoprocessing as gp
-    dict_properties = gp.get_raster_properties_uri(path_ds)
+    dict_properties = ggeo.get_raster_properties_uri(path_ds)
 
     return dict_properties[name_property]
 
@@ -110,8 +59,7 @@ def get_values_rat_column(path_ds, name_col='Value'):
     Returns:
 
     """
-    from pygeoprocessing import geoprocessing as gp
-    dict_values = gp.get_rat_as_dictionary_uri(path_ds)
+    dict_values = ggeo.get_rat_as_dictionary_uri(path_ds)
 
     name_key = [s for s in dict_values.keys() if '.' + name_col in s]
 
@@ -136,37 +84,8 @@ def lookup(path_ds, path_out_ds, from_field='Value', to_field='', overwrite=True
     val_to = get_values_rat_column(path_ds, name_col=to_field)
 
     dict_reclass = dict(zip(val_from, val_to))
-    gp.reclassify_dataset_uri(path_ds, dict_reclass, path_out_ds, out_datatype=get_dataset_datatype(path_ds),
-                              out_nodata=gp.get_nodata_from_uri(path_ds))
-
-
-def convert_raster_to_ascii(path_input_raster, path_ascii_output, overwrite=True):
-    """
-    Convert input raster to ascii format
-    Args:
-        path_input_raster:
-        path_ascii_output:
-        overwrite:
-
-    Returns:
-
-    """
-    if overwrite and os.path.isfile(path_ascii_output):
-        os.remove(path_ascii_output)
-
-    # Open existing dataset
-    path_inp_ds = gdal.Open(path_input_raster)
-
-    # Open output format driver, gdal_translate --formats lists all of them
-    format_file = 'AAIGrid'
-    driver = gdal.GetDriverByName(format_file)
-
-    # Output to new format
-    path_dest_ds = driver.CreateCopy(path_ascii_output, path_inp_ds, 0)
-
-    # Close the datasets to flush to disk
-    path_dest_ds = None
-    path_inp_ds = None
+    gp.reclassify_dataset_uri(path_ds, dict_reclass, path_out_ds, out_datatype=ggeo.get_dataset_datatype(path_ds),
+                              out_nodata=ggeo.get_nodata_from_uri(path_ds))
 
 
 def get_arr_res(lats, lons):
@@ -385,8 +304,15 @@ def clip_raster(path_raster, path_mask, path_out_ras, process_pool=multiprocessi
     :param process_pool: Parallel or not
     :return:
     """
-    from pygeoprocessing import geoprocessing as gp
-    gp.clip_dataset_uri(path_raster, path_mask, path_out_ras, process_pool=process_pool)
+    # from pygeoprocessing import geoprocessing as gp
+    # gp.clip_dataset_uri(path_raster, path_mask, path_out_ras, process_pool=process_pool)
+    import subprocess
+    rio_clip = 'rio clip ' + path_raster + ' ' + path_out_ras + ' --like ' + path_mask
+
+    try:
+        subprocess.check_output(rio_clip, stderr=subprocess.STDOUT, shell=True)
+    except:
+        pass
 
 
 def select(path_inp, name_col, val, path_out):
