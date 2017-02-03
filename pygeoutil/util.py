@@ -529,7 +529,7 @@ def get_immediate_subdirectories(path_base_dir):
 def get_modification_date(filename):
     """
     http://stackoverflow.com/questions/237079/how-to-get-file-creation-modification-date-times-in-python
-    E.g. print modification_date('/var/log/syslog')
+    E.g. print(modification_date('/var/log/syslog'))
     >>> 2009-10-06 10:50:01
     Args:
         filename:
