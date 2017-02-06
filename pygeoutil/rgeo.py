@@ -3,6 +3,8 @@ import pdb
 import rasterio
 import gdal
 import glob
+import json
+import subprocess
 
 import pandas as pd
 import numpy as np
@@ -59,11 +61,19 @@ def get_values_rat_column(path_ds, name_col='Value'):
     Returns:
 
     """
-    dict_values = ggeo.get_rat_as_dictionary_uri(path_ds)
+    _rat = subprocess.check_output('gdalinfo -json ' + path_ds, shell=True)
+    data = json.loads(_rat)  # load json string into dictionary
 
-    name_key = [s for s in dict_values.keys() if '.' + name_col in s]
+    # dict_values = ggeo.get_rat_as_dictionary_uri(path_ds)
+    _col_names = [x['name'] for x in data['rat']['fieldDefn']]
+    df = pd.DataFrame(columns=_col_names)
+    for _row in data['rat']['row']:
+         df.loc[len(df)] = _row['f']
 
-    return dict_values.get(name_key[0], None)
+    return df[df.columns[df.columns.to_series().str.contains(name_col)]].values.T[0]
+    #name_key = [s for s in dict_values.keys() if '.' + name_col in s]
+
+    #return dict_values.get(name_key[0], None)
 
 
 def lookup(path_ds, path_out_ds, from_field='Value', to_field='', overwrite=True):
@@ -79,13 +89,16 @@ def lookup(path_ds, path_out_ds, from_field='Value', to_field='', overwrite=True
     Returns:
 
     """
-    from pygeoprocessing import geoprocessing as gp
     val_from = get_values_rat_column(path_ds, name_col=from_field)
     val_to = get_values_rat_column(path_ds, name_col=to_field)
 
     dict_reclass = dict(zip(val_from, val_to))
-    gp.reclassify_dataset_uri(path_ds, dict_reclass, path_out_ds, out_datatype=ggeo.get_dataset_datatype(path_ds),
-                              out_nodata=ggeo.get_nodata_from_uri(path_ds))
+
+    ggeo.reclassify_dataset_uri(path_ds,
+                                dict_reclass,
+                                path_out_ds,
+                                out_datatype=ggeo.get_dataset_datatype(path_ds),
+                                out_nodata=ggeo.get_nodata_from_uri(path_ds))
 
 
 def get_arr_res(lats, lons):
