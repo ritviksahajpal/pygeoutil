@@ -46,3 +46,18 @@ def make_movie(list_images, out_path, out_fname):
 
     convert_cmd = 'convert -delay 50 -loop 1 '+' '.join(list_images) + ' ' + out_path + os.sep + out_fname
     subprocess.call(convert_cmd, shell=True)
+
+
+def discrete_cmap(N, base_cmap=None):
+    """Create an N-bin discrete colormap from the specified input map"""
+    # https: // gist.github.com / jakevdp / 91077b0cae40f8f8244a
+    # Note that if base_cmap is a string or None, you can simply do return plt.cm.get_cmap(base_cmap, N)
+    # The following works for string, None, or a colormap instance:
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    base = plt.cm.get_cmap(base_cmap)
+    color_list = base(np.linspace(0, 1, N))
+    cmap_name = base.name + str(N)
+
+    return base.from_list(cmap_name, color_list, N)
