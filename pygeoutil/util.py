@@ -689,7 +689,7 @@ def open_or_die(path_file, perm='r', csv_header=0, skiprows=0, delimiter=' ', ma
 
     """
     try:
-        if os.path.splitext(path_file)[1] == '.nc' and not use_xarray:
+        if os.path.splitext(path_file)[1] in ['.nc', '.nc4'] and not use_xarray:
             hndl = netCDF4.Dataset(path_file, perm, format='NETCDF4')
             return hndl
         elif os.path.splitext(path_file)[1] == '.csv':
@@ -709,7 +709,7 @@ def open_or_die(path_file, perm='r', csv_header=0, skiprows=0, delimiter=' ', ma
             data = iter_loadtxt(path_file, delimiter=delimiter, skiprows=skiprows)
             data = np.ma.masked_values(data, mask_val)
             return data
-        elif os.path.splitext(path_file)[1] == '.nc' and use_xarray:
+        elif os.path.splitext(path_file)[1] in ['.nc', '.nc4'] and use_xarray:
             hndl = xr.open_dataset(path_file, **kwargs)
             return hndl
         else:
