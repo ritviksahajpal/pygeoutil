@@ -38,6 +38,7 @@ def get_xy_ts(path_file, name_var, pos_x, pos_y, date_start, date_end):
 
     """
     try:
+        pdb.set_trace()
         _hndl_fl = open_or_die(path_file)
 
         if os.path.splitext(path_file)[1] in ['.nc', '.nc4']:
