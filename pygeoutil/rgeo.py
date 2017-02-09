@@ -1,5 +1,6 @@
 import os
 import pdb
+import re
 import rasterio
 import gdal
 import glob
@@ -34,6 +35,60 @@ from shapely.geometry import mapping, shape
 # sieve: http://pktools.nongnu.org/html/pksieve.html
 # composite/mosaic: http://pktools.nongnu.org/html/pkcomposite.html
 # mosaic
+
+
+def dms2dd(degrees, minutes, seconds, direction):
+    """
+    http://en.proft.me/2015/09/20/converting-latitude-and-longitude-decimal-values-p/
+    Args:
+        degrees:
+        minutes:
+        seconds:
+        direction:
+
+    Returns:
+
+    """
+    dd = float(degrees) + float(minutes)/60 + float(seconds)/(60*60)
+
+    if direction == 'S' or direction == 'W':
+        dd *= -1
+
+    return dd
+
+
+def dd2dms(deg):
+    """
+    http://en.proft.me/2015/09/20/converting-latitude-and-longitude-decimal-values-p/
+    Args:
+        deg:
+
+    Returns:
+
+    """
+    d = int(deg)
+    md = abs(deg - d) * 60
+    m = int(md)
+    sd = (md - m) * 60
+
+    return [d, m, sd]
+
+
+def parse_dms(dms):
+    """
+    http://en.proft.me/2015/09/20/converting-latitude-and-longitude-decimal-values-p/
+    example: parse_dms("36°57'9' N 110°4'21' W")
+    Args:
+        dms:
+
+    Returns:
+
+    """
+    parts = re.split('[^\d\w]+', dms)
+    lat = dms2dd(parts[0], parts[1], parts[2], parts[3])
+    lng = dms2dd(parts[4], parts[5], parts[6], parts[7])
+
+    return lat, lng
 
 
 def get_properties(path_ds, name_property):
