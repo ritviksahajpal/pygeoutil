@@ -23,6 +23,33 @@ np.seterr(divide='ignore', invalid='ignore')
 ######################
 # Miscellaneous
 ######################
+def get_xy_ts(path_file, name_var, pos_x, pos_y, date_start, date_end):
+    """
+    Get a time-series of values from a file (e.g. netCDF)
+    Args:
+        path_file:
+        name_var:
+        pos_x:
+        pos_y:
+        date_start:
+        date_end:
+
+    Returns:
+
+    """
+    try:
+        _hndl_fl = open_or_die(path_file)
+
+        if os.path.splitext(path_file)[1] in ['.nc', '.nc4']:
+            vals = _hndl_fl[name_var].sel(time=slice(date_start, date_end)).isel(longitude=pos_x, latitude=pos_y)
+        else:
+            raise IOError('Invalid file type ' + os.path.splitext(path_file)[1])
+    except:
+        raise IOError('Error opening file ' + path_file)
+
+    return vals
+
+
 def get_key_from_val(dicts, name_val):
     """
     Find if name_val is in one of the values in dicts, return corresponding key
