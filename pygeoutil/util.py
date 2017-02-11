@@ -41,7 +41,8 @@ def get_xy_ts(path_file, name_var, pos_x, pos_y, date_start, date_end):
         _hndl_fl = open_or_die(path_file, use_xarray=True)
 
         if os.path.splitext(path_file)[1] in ['.nc', '.nc4']:
-            vals = _hndl_fl[name_var].sel(time=slice(date_start, date_end)).isel(longitude=pos_x, latitude=pos_y)
+            vals = _hndl_fl[name_var].sel(time=slice(date_start, date_end)).isel(longitude=pos_x, latitude=pos_y,
+                                                                                 method='nearest')
         else:
             raise IOError('Invalid file type ' + os.path.splitext(path_file)[1])
     except:
