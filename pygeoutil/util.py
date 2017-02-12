@@ -223,7 +223,6 @@ def nan_helper(y):
 
 def sliding_mean(data_array, window=5):
     """
-    TEST for PALU
     This function takes an array of numbers and smoothes them out.
     Smoothing is useful for making plots a little easier to read.
     Args:
