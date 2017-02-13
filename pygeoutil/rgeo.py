@@ -7,12 +7,15 @@ import glob
 import json
 import subprocess
 
+import urllib.request
 import pandas as pd
 import numpy as np
 import multiprocessing
 import sys
 from . import ggeo
 
+from pcse.db import NASAPowerWeatherDataProvider
+from tsgettoolbox import tsgettoolbox
 from geopy.geocoders import Nominatim
 import geocoder
 from geopy.exc import GeocoderTimedOut
@@ -89,6 +92,98 @@ def parse_dms(dms):
     lng = dms2dd(parts[4], parts[5], parts[6], parts[7])
 
     return lat, lng
+
+
+def get_met(lat, lon, start_date=None, end_date=None):
+    """
+
+    :param lat: 
+    :param lon: 
+    :param start_date: 
+    :param end_date: 
+    :return: 
+    """
+    wdp = NASAPowerWeatherDataProvider(lat, lon, start_date, end_date)
+    _df = wdp._query_NASAPower_server(lat, lon, start_date, end_date)
+
+    _df = [x.decode("utf-8") for x in _df]  # Decode from bytes to strings
+    _ix = [i for i, s in enumerate(_df) if 'END HEADER' in s][0]  # Find end of header
+    _header = [x for x in _df[_ix - 1].split()]  # Header is one line before end of header
+    _df = _df[_ix + 1:]  # All data (except after END HEADER)
+
+    # Convert data to dataframe
+    df = pd.DataFrame(columns=_header, data=[row.split() for row in _df])
+    df.replace('-', np.NaN, inplace=True)
+    df = pd.to_numeric(df.stack(), 'coerce').unstack()
+    df['datetime'] = pd.to_datetime(df['YEAR'].astype(int), format='%Y') + pd.to_timedelta(df['DOY'] - 1, unit='d')
+
+    # Add datetime column and set it as index
+    if 'datetime' in df and not isinstance(df.index, pd.DatetimeIndex):
+        df = df.set_index('datetime')
+
+    return df
+
+
+def get_ts(lat, lon, name_var, var=None, sub_var=None, start_date=None, end_date=None):
+    """
+
+    :param lat: 
+    :param lon: 
+    :param name_var: e.g. 'modis'    
+    :param var: e.g. 
+    :param sub_var: e.g. MYD17A2
+    :param start_date: 
+    :param end_date: 
+    :return: 
+    """
+    if name_var == 'modis':
+        df = tsgettoolbox.modis(lat=lat,
+                                lon=lon,
+                                product=var,  # e.g. MOD13Q1
+                                band=sub_var,  # e.g. 250m_16_days_NDVI
+                                startdate=start_date,
+                                enddate=end_date)
+    elif name_var == 'ldas':
+        # NOTE: Only works for lat/lon within U.S.A (GLDAS gives HTTP 404 error)
+        df = tsgettoolbox.ldas(lat=lat,
+                               lon=lon,
+                               variable=var,  # e.g. 'GLDAS:GLDAS_NOAH025_3H.001:TSOIL0-10cm'
+                               startDate=start_date + 'T00',
+                               endDate=end_date + 'T00')
+    elif name_var == 'power':  # NASA POWER
+        df = get_met(lat,
+                     lon,
+                     start_date=start_date,
+                     end_date=end_date)
+    else:
+        raise ValueError
+
+    return df
+
+
+def get_elev(lat, lon, name_var):
+    """
+    Get elevation from GOOGLE eleeation API    
+    :param lat: 
+    :param lon: 
+    :param name_var: 
+    :return: 
+    """
+    if name_var == 'elev':
+        base_url = 'http://maps.googleapis.com/maps/api/elevation/json?'
+        params_url = "locations=%s,%s&sensor=%s" % (lat, lon, 'false')
+        url = base_url + params_url
+
+        with urllib.request.urlopen(url) as f:
+            response = json.loads(f.read().decode())
+
+        # status = response['status']  # TODO Make sure status is correct
+        result = response['results'][0]
+
+        # Returns height above sea level in metres
+        return float(result['elevation'])
+    else:
+        raise ValueError
 
 
 def get_properties(path_ds, name_property):

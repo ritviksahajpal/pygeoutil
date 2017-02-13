@@ -6,6 +6,7 @@ import datetime
 import sys
 import calendar
 import subprocess
+import rasterio
 
 from . import rgeo
 
@@ -23,9 +24,10 @@ np.seterr(divide='ignore', invalid='ignore')
 ######################
 # Miscellaneous
 ######################
-def get_xy_ts(path_file, name_var, pos_x, pos_y, date_start, date_end):
+def get_xy_ts(path_file, pos_x, pos_y, name_var=None, date_start=None, date_end=None):
     """
     Get a time-series of values from a file (e.g. netCDF)
+    If file does not have a time-series e.g. .tif then just return value
     Args:
         path_file:
         name_var:
@@ -38,11 +40,13 @@ def get_xy_ts(path_file, name_var, pos_x, pos_y, date_start, date_end):
 
     """
     try:
-        _hndl_fl = open_or_die(path_file, use_xarray=True)
-
         if os.path.splitext(path_file)[1] in ['.nc', '.nc4']:
+            _hndl_fl = open_or_die(path_file, use_xarray=True)
             vals = _hndl_fl[name_var].sel(time=slice(date_start, date_end)).sel(longitude=pos_x, latitude=pos_y,
                                                                                 method='nearest')
+        elif os.path.splitext(path_file)[1] in ['.tif']:
+            with rasterio.open(path_file) as src:
+                vals = src.sample([(pos_x, pos_y)])
         else:
             raise IOError('Invalid file type ' + os.path.splitext(path_file)[1])
     except:
@@ -742,10 +746,8 @@ def open_or_die(path_file, perm='r', csv_header=0, skiprows=0, delimiter=' ', ma
             return hndl
         else:
             raise IOError('Invalid file type ' + os.path.splitext(path_file)[1])
-            sys.exit(0)
     except:
         raise IOError('Error opening file ' + path_file)
-        sys.exit(0)
 
 
 def get_ascii_plot_parameters(asc, step_length=10.0):
