@@ -14,7 +14,6 @@ import multiprocessing
 import sys
 from . import ggeo
 
-from pcse.db import NASAPowerWeatherDataProvider
 from tsgettoolbox import tsgettoolbox
 from geopy.geocoders import Nominatim
 import geocoder
@@ -103,6 +102,7 @@ def get_met(lat, lon, start_date=None, end_date=None):
     :param end_date: 
     :return: 
     """
+    from pcse.db import NASAPowerWeatherDataProvider
     wdp = NASAPowerWeatherDataProvider(lat, lon, start_date, end_date)
     _df = wdp._query_NASAPower_server(lat, lon, start_date, end_date)
 
