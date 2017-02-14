@@ -148,8 +148,8 @@ def get_ts(lat, lon, name_var, var=None, sub_var=None, start_date=None, end_date
         df = tsgettoolbox.ldas(lat=lat,
                                lon=lon,
                                variable=var,  # e.g. 'GLDAS:GLDAS_NOAH025_3H.001:TSOIL0-10cm'
-                               startDate=start_date + 'T00',
-                               endDate=end_date + 'T00')
+                               startDate=start_date,
+                               endDate=end_date)
     elif name_var == 'power':  # NASA POWER
         df = get_met(lat,
                      lon,

@@ -506,17 +506,15 @@ def write_ascii(arr, path_out, name_fl, ncols, nrows, cell_size, xllcorner=-180,
     """
     make_dir_if_missing(path_out)
 
-    asc_file = open(path_out + os.sep + name_fl, 'w+')
+    with open(path_out + os.sep + name_fl, 'w+') as asc_file:
+        asc_file.write('ncols         %s\n' % ncols)
+        asc_file.write('nrows         %s\n' % nrows)
+        asc_file.write('xllcorner     %s\n' % xllcorner)
+        asc_file.write('yllcorner     %s\n' % yllcorner)
+        asc_file.write('cellsize      %s\n' % cell_size)
+        asc_file.write('NODATA_value  %s\n' % nodata_val)
 
-    asc_file.write('ncols         %s\n' % ncols)
-    asc_file.write('nrows         %s\n' % nrows)
-    asc_file.write('xllcorner     %s\n' % xllcorner)
-    asc_file.write('yllcorner     %s\n' % yllcorner)
-    asc_file.write('cellsize      %s\n' % cell_size)
-    asc_file.write('NODATA_value  %s\n' % nodata_val)
-
-    np.savetxt(asc_file, arr, fmt='%.6f', delimiter=' ')
-    asc_file.close()
+        np.savetxt(asc_file, arr, fmt='%.6f', delimiter=' ')
 
 
 ######################
