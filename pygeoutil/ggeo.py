@@ -1194,7 +1194,7 @@ def align_dataset_list(
         bounding_box = get_bounding_box(
             dataset_uri_list[dataset_to_bound_index])
     else:
-        bounding_box = reduce(
+        bounding_box = functools.reduce(
             functools.partial(merge_bounding_boxes, mode=mode),
             [get_bounding_box(dataset_uri) for dataset_uri in dataset_uri_list])
 
