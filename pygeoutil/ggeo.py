@@ -536,6 +536,108 @@ def reclassify_dataset_uri(
         datasets_are_pre_aligned=True)
 
 
+def clip_dataset_uri(
+        source_dataset_uri, aoi_datasource_uri, out_dataset_uri,
+        assert_projections=True, process_pool=None, all_touched=False):
+    """Clip raster dataset to bounding box of provided vector datasource aoi.
+
+    This function will clip source_dataset to the bounding box of the
+    polygons in aoi_datasource and mask out the values in source_dataset
+    outside of the AOI with the nodata values in source_dataset.
+
+    Args:
+        source_dataset_uri (string): uri to single band GDAL dataset to clip
+        aoi_datasource_uri (string): uri to ogr datasource
+        out_dataset_uri (string): path to disk for the clipped datset
+
+    Keyword Args:
+        assert_projections (boolean): a boolean value for whether the dataset
+            needs to be projected
+        process_pool: a process pool for multiprocessing
+        all_touched (boolean): if true the clip uses the option
+            ALL_TOUCHED=TRUE when calling RasterizeLayer for AOI masking.
+
+    Returns:
+        None
+    """
+    source_dataset = gdal.Open(source_dataset_uri)
+
+    band = source_dataset.GetRasterBand(1)
+    nodata = band.GetNoDataValue()
+    datatype = band.DataType
+
+    if nodata is None:
+        nodata = -9999
+
+    gdal.Dataset.__swig_destroy__(source_dataset)
+    source_dataset = None
+
+    pixel_size = get_raster_info(source_dataset_uri)['mean_pixel_size']
+    vectorize_datasets(
+        [source_dataset_uri], lambda x: x, out_dataset_uri, datatype, nodata,
+        pixel_size, 'intersection', aoi_uri=aoi_datasource_uri,
+        assert_datasets_projected=assert_projections,
+        process_pool=process_pool, vectorize_op=False, all_touched=all_touched)
+
+
+def get_raster_info(raster_path):
+    """Get information about a GDAL raster dataset.
+
+    Parameters:
+       raster_path (String): a path to a GDAL raster.
+
+    Returns:
+        raster_properties (dictionary): a dictionary with the properties
+            stored under relevant keys.
+
+            'pixel_size' (tuple): (pixel x-size, pixel y-size) from
+                geotransform.
+            'mean_pixel_size' (float): the average size of the absolute value
+                of each pixel size element.
+            'raster_size' (tuple):  number of raster pixels in (x, y)
+                direction.
+            'nodata' (float or list): if number of bands is 1, then this value
+                is the nodata value of the single band, otherwise a list of
+                the nodata values in increasing band index
+            'n_bands' (int): number of bands in the raster.
+            'geotransform' (tuple): a 6-tuple representing the geotransform of
+                (x orign, x-increase, xy-increase,
+                 y origin, yx-increase, y-increase),
+            'datatype' (int): An instance of an enumerated gdal.GDT_* int
+                that represents the datatype of the raster.
+    """
+    raster_properties = {}
+    raster = gdal.Open(raster_path)
+    geo_transform = raster.GetGeoTransform()
+    raster_properties['pixel_size'] = (geo_transform[1], geo_transform[5])
+    raster_properties['mean_pixel_size'] = (
+        (abs(geo_transform[1]) + abs(geo_transform[5])) / 2.0)
+    raster_properties['raster_size'] = (
+        raster.GetRasterBand(1).XSize,
+        raster.GetRasterBand(1).YSize)
+    raster_properties['n_bands'] = raster.RasterCount
+    raster_properties['nodata'] = [
+        raster.GetRasterBand(index).GetNoDataValue() for index in range(
+            1, raster_properties['n_bands']+1)]
+    if len(raster_properties['nodata']) == 1:
+        raster_properties['nodata'] = raster_properties['nodata'][0]
+
+    raster_properties['bounding_box'] = [
+        geo_transform[0], geo_transform[3],
+        (geo_transform[0] +
+         raster_properties['raster_size'][0] * geo_transform[1]),
+        (geo_transform[3] +
+         raster_properties['raster_size'][1] * geo_transform[5])]
+
+    raster_properties['geotransform'] = geo_transform
+
+    # datatype is the same for the whole raster, but is associated with band
+    raster_properties['datatype'] = raster.GetRasterBand(1).DataType
+
+    raster = None
+    return raster_properties
+
+
 def vectorize_datasets(
         dataset_uri_list, dataset_pixel_op, dataset_out_uri, datatype_out,
         nodata_out, pixel_size_out, bounding_box_mode,

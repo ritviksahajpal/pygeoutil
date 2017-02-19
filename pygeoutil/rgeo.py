@@ -458,7 +458,7 @@ def get_country_lat_lon_extent(alpha2):
         return [-80, -50, -16, -64]
 
 
-def clip_raster(path_raster, path_mask, path_out_ras, process_pool=multiprocessing.cpu_count() - 1):
+def clip_raster(path_raster, path_mask, path_out_ras):
     """
 
     :param path_raster: Raster
@@ -467,15 +467,17 @@ def clip_raster(path_raster, path_mask, path_out_ras, process_pool=multiprocessi
     :param process_pool: Parallel or not
     :return:
     """
-    # from pygeoprocessing import geoprocessing as gp
-    # gp.clip_dataset_uri(path_raster, path_mask, path_out_ras, process_pool=process_pool)
     import subprocess
-    rio_clip = 'rio clip ' + path_raster + ' ' + path_out_ras + ' --like ' + path_mask
+
+    if os.path.splitext(path_mask)[1] != '.shp':
+        _cmd = 'rio clip ' + path_raster + ' ' + path_out_ras + ' --like ' + path_mask
+    else:
+        _cmd = 'rio clip ' + path_raster + ' ' + path_out_ras + ' --bounds $(fio info ' + path_mask + ' --bounds)'
 
     try:
-        subprocess.check_output(rio_clip, stderr=subprocess.STDOUT, shell=True)
+        subprocess.check_output(_cmd, stderr=subprocess.STDOUT, shell=True)
     except:
-        pass
+        raise ValueError('clip_raster encountered error')
 
 
 def select(path_inp, name_col, val, path_out):
@@ -494,13 +496,16 @@ def select(path_inp, name_col, val, path_out):
 
     with fiona.open(path_inp) as src:
         with fiona.open(path_out, 'w', **src.meta) as sink:
-            filtered = filter(lambda f: f['properties'][name_col] == val, src)
+            for feature in src:
+                if feature['properties'][name_col] == val:
+                    sink.write(feature)
 
-            geom = shape(filtered[0]['geometry'])
-            filtered[0]['geometry'] = mapping(geom)
-
-            sink.write(filtered[0])
-
+            # filtered = filter(lambda f: f['properties'][name_col] == val, src)
+            # pdb.set_trace()
+            # geom = shape(filtered[0]['geometry'])
+            # filtered[0]['geometry'] = mapping(geom)
+            #
+            # sink.write(filtered[0])
 
 if __name__ == '__main__':
     pass

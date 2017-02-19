@@ -308,7 +308,7 @@ def get_df_idx(df, freq='M'):
 ######################
 # numpy array ops
 ######################
-def replace_subset_arr(lats, lons, cell_size, subset_arr, default_val=np.NaN):
+def replace_subset_arr(lats, lons, cell_size, subset_arr, default_val=np.NaN, _type='0'):
     """
 
     Args:
@@ -335,7 +335,10 @@ def replace_subset_arr(lats, lons, cell_size, subset_arr, default_val=np.NaN):
     end_col = rgeo.get_geo_idx(lons[-1], longitudes)
 
     subset_arr = np.nan_to_num(subset_arr)
-    arr_global[start_row:end_row + 1, start_col:end_col + 1] = subset_arr
+    if _type != '1':
+        arr_global[start_row:end_row + 1, start_col:end_col + 1] = subset_arr
+    else:
+        arr_global[start_row:end_row + 1, start_col:end_col + 1] = subset_arr[0][:, :-1]
 
     return arr_global
 
