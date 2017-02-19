@@ -1140,13 +1140,14 @@ def align_dataset_list(
     Returns:
         None
     """
+    import functools
     last_time = time.time()
 
     # make sure that the input lists are of the same length
     list_lengths = [
         len(dataset_uri_list), len(dataset_out_uri_list),
         len(resample_method_list)]
-    if not reduce(lambda x, y: x if x == y else False, list_lengths):
+    if not functools.reduce(lambda x, y: x if x == y else False, list_lengths):
         raise Exception(
             "dataset_uri_list, dataset_out_uri_list, and "
             "resample_method_list must be the same length "
