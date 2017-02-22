@@ -523,6 +523,25 @@ def write_ascii(arr, path_out, name_fl, ncols, nrows, cell_size, xllcorner=-180,
 ######################
 # Managing file system
 ######################
+def delete_empty_dirs(_dir):
+    """
+    Cleanup by deleting folders which have no files in them. Delete folders which only have empty subdirs
+    Args:
+        _dir:
+
+    Returns:
+
+    """
+    _dirs = [x[0] for x in os.walk(_dir)]
+
+    for _d in _dirs:
+        if not len([entry for entry in os.scandir(_d) if entry.is_file()]):
+            try:
+                os.removedirs(_d)
+            except OSError:
+                pass
+
+
 def all_files_under(path, match_str=None):
     """
     Iterates through all files that are under the given path.
