@@ -443,9 +443,12 @@ def get_country_lat_lon_extent(alpha2):
     Args:
         alpha2:
 
-    Returns:
+    Returns: longitude(left) longitude(right), latitude (bottom), latitude(top)
 
     """
+    #
+    # 'mexico', 'south_africa', 'spain', 'australia', 'ukraine', 'uk_of_great_britain_and_northern_ireland',
+    # 'germany','spain', 'kazakhstan', 'hungary', 'italy','indonesia'
     if alpha2 == 'united_states_of_america':
         return [-130, -60, 25, 48]
     elif alpha2 == 'russian_federation':
@@ -456,6 +459,40 @@ def get_country_lat_lon_extent(alpha2):
         return [64, 100, 4, 37]
     elif alpha2 == 'argentina':
         return [-80, -50, -16, -64]
+    elif alpha2 == 'brazil':
+        return [-75, -35, 5, -35]
+    elif alpha2 == 'canada':
+        return [-140, -50, 40, 70]
+    elif alpha2 == 'egypt':
+        return [-80, -50, -16, -64]
+    elif alpha2 == 'france':
+        return [-80, -50, -16, -64]
+    elif alpha2 == 'mexico':
+        return [-120, -85, 15, 35]
+    elif alpha2 == 'south_africa':
+        return [10, 35, -20, -35]
+    elif alpha2 == 'spain':
+        return [-80, -50, -16, -64]
+    elif alpha2 == 'australia':
+        return [-80, -50, -16, -64]
+    elif alpha2 == 'ukraine':
+        return [-80, -50, -16, -64]
+    elif alpha2 == 'uk_of_great_britain_and_northern_ireland':
+        return [-80, -50, -16, -64]
+    elif alpha2 == 'germany':
+        return [-80, -50, -16, -64]
+    elif alpha2 == 'spain':
+        return [-80, -50, -16, -64]
+    elif alpha2 == 'kazakhstan':
+        return [-80, -50, -16, -64]
+    elif alpha2 == 'hungary':
+        return [-80, -50, -16, -64]
+    elif alpha2 == 'italy':
+        return [-80, -50, -16, -64]
+    elif alpha2 == 'indonesia':
+        return [-80, -50, -16, -64]
+    else:
+        return [-180, 180, -90, 90]
 
 
 def clip_raster(path_raster, path_mask, path_out_ras):
