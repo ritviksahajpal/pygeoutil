@@ -392,6 +392,33 @@ def copy_shpfile(path_inp_shp, path_out_shp):
         copyfile(fl, path_out + os.sep + name_new_file + ext)
 
 
+def get_ras_attr(path_ras, name_attr):
+    """
+    Returns raster metadata
+    Args:
+        path_ras:
+        name_attr:
+
+    Returns:
+
+    """
+    with rasterio.open(path_ras) as src:
+        return src.profile[name_attr]
+
+
+def get_ras_profile(path_ras):
+    """
+
+    Args:
+        path_ras:
+
+    Returns:
+
+    """
+    with rasterio.open(path_ras) as src:
+        return src.profile
+
+
 def extract_at_point_from_ras(path_ras, lon, lat):
     """
     Extract value from raster at given longitude and latitude
@@ -404,10 +431,9 @@ def extract_at_point_from_ras(path_ras, lon, lat):
     Returns:
 
     """
-    with rasterio.drivers():
-        # Read raster bands directly to numpy arrays
-        with rasterio.open(path_ras) as src:
-            return np.asarray(src.sample([(lon, lat)]))
+    # Read raster bands directly to numpy arrays
+    with rasterio.open(path_ras) as src:
+        return np.asarray(src.sample([(lon, lat)]))
 
 
 def get_grid_cell_area(nrows, ncols):
