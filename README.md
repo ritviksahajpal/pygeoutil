@@ -2,7 +2,7 @@
 
 pygeoutil is a collection of utilities  
 
-e-mail: _sahajpal.ritvik@gmail.com_  
+E-mail: _sahajpal.ritvik@gmail.com_  
 
 ### Organization of the  project
 
