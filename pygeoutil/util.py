@@ -41,9 +41,9 @@ def get_xy_ts(path_file, pos_x, pos_y, name_var=None, date_start=None, date_end=
     """
     try:
         if os.path.splitext(path_file)[1] in ['.nc', '.nc4']:
-            _hndl_fl = open_or_die(path_file, use_xarray=True)
-            vals = _hndl_fl[name_var].sel(time=slice(date_start, date_end)).sel(longitude=pos_x, latitude=pos_y,
-                                                                                method='nearest')
+            _hndl_fl = open_or_die(path_file, use_xarray=True, decode_cf=False)
+
+            vals = _hndl_fl[name_var].sel(time=slice(date_start, date_end)).sel(longitude=pos_x, latitude=pos_y, method='nearest')
         elif os.path.splitext(path_file)[1] in ['.tif']:
             with rasterio.open(path_file) as src:
                 vals = src.sample([(pos_x, pos_y)])
@@ -1779,11 +1779,7 @@ def merge_nc_files(all_nc_files, path_out_nc, common_var_name=None, replace_var_
         else:
             list_fls = all_nc_files
 
-    if replace_var_by_file_name:
-        _merged = xr.merge(list_fls)
-    else:
-        _merged = xr.merge([xr.open_dataset(_fl, **kwargs) for _fl in list_fls])
-
+    _merged = xr.open_mfdataset(list_fls)
     _merged.to_netcdf(path_out_nc, mode='w', encoding=dict_zlib)
 
 
