@@ -281,7 +281,6 @@ def get_geo_idx(val_dd, array_dd):
     return (np.abs(array_dd - val_dd)).argmin()
 
 
-@lru_cache(maxsize=1024)
 def get_latlon_location(loc):
     """
     Get latitude/longitude of location
@@ -306,7 +305,6 @@ def get_latlon_location(loc):
     return lat, lon
 
 
-@lru_cache(maxsize=1024)
 def get_hemisphere(loc, boundary=0.0):
     """
     Get hemisphere in which a location lies (northern/southern)
@@ -325,7 +323,6 @@ def get_hemisphere(loc, boundary=0.0):
         return 'S'
 
 
-@lru_cache(maxsize=1024)
 def is_temperate(loc, n_boundary=23.5, s_boundary=-23.5):
     """
 
