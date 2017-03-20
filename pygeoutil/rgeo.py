@@ -2,26 +2,20 @@ import os
 import pdb
 import re
 import rasterio
-import gdal
 import glob
 import json
 import subprocess
 
 import pandas as pd
 import numpy as np
-import multiprocessing
 import sys
 from . import ggeo
 
 from tsgettoolbox import tsgettoolbox
 from geopy.geocoders import Nominatim
-import geocoder
-from geopy.exc import GeocoderTimedOut
 from shutil import copyfile
-from functools import lru_cache
 import shapefile
 import fiona
-from shapely.geometry import mapping, shape
 
 # TODO zonal statistics: https://github.com/perrygeo/python-rasterstats
 # resize and resample:  http://data.naturalcapitalproject.org/pygeoprocessing/api/latest/api/geoprocessing.html
