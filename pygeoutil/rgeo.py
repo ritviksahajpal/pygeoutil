@@ -7,7 +7,6 @@ import glob
 import json
 import subprocess
 
-import urllib.request
 import pandas as pd
 import numpy as np
 import multiprocessing
@@ -169,6 +168,7 @@ def get_elev(lat, lon, name_var):
     :param name_var: 
     :return: 
     """
+    import urllib.request
     if name_var == 'elev':
         base_url = 'http://maps.googleapis.com/maps/api/elevation/json?'
         params_url = "locations=%s,%s&sensor=%s" % (lat, lon, 'false')

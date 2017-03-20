@@ -1006,7 +1006,11 @@ def get_nc_var3d(hndl_nc, var, year, subset_arr=None):
         val = np.nan
         raise AttributeError('Error in getting var ' + var + ' for year ' + str(year) + ' from netcdf ')
 
-    return val
+    if isinstance(val, np.ma.MaskedArray):
+        val[val.data == val.fill_value] = 0.0  # replace fill value by 0
+        return val.data
+    else:
+        return val
 
 
 def get_nc_var2d(hndl_nc, var, subset_arr=None):
@@ -1046,7 +1050,10 @@ def get_nc_var2d(hndl_nc, var, subset_arr=None):
         val = np.nan
         raise AttributeError('Error in getting var ' + var + ' from netcdf ')
 
-    return val
+    if isinstance(val, np.ma.MaskedArray):
+        return val.data
+    else:
+        return val
 
 
 def get_nc_var1d(hndl_nc, var):
@@ -1069,7 +1076,10 @@ def get_nc_var1d(hndl_nc, var):
         val = np.nan
         raise AttributeError('Error in getting var ' + var + ' from netcdf ')
 
-    return val
+    if isinstance(val, np.ma.MaskedArray):
+        return val.data
+    else:
+        return val
 
 
 def get_time_nc(path_nc, name_time_var='time'):
@@ -1749,7 +1759,7 @@ def modify_nc_val(path_inp, var, new_val):
 
 def merge_nc_files(all_nc_files, path_out_nc, common_var_name=None, replace_var_by_file_name=True, **kwargs):
     """
-    Merge multiple netCDF files. If each file has variale with same name then rename to name of netCDF file
+    Merge multiple netCDF files. If each file has variable with same name then rename to name of netCDF file
     Args:
         all_nc_files: list of paths to all netCDF files
         path_out_nc: path of output netCDF file that will be created
@@ -1779,8 +1789,12 @@ def merge_nc_files(all_nc_files, path_out_nc, common_var_name=None, replace_var_
         else:
             list_fls = all_nc_files
 
-    _merged = xr.open_mfdataset(list_fls)
-    _merged.to_netcdf(path_out_nc, mode='w', encoding=dict_zlib)
+    if replace_var_by_file_name:
+        hndl_merged = xr.merge(list_fls)
+    else:
+        hndl_merged = xr.merge([xr.open_dataset(_fl, **kwargs) for _fl in list_fls])
+    hndl_merged = hndl_merged.fillna(0.0)
+    hndl_merged.to_netcdf(path_out_nc, mode='w', encoding=dict_zlib)
 
 
 if __name__ == '__main__':
