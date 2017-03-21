@@ -19,6 +19,26 @@ def remove_nans(a, b):
     return a, b
 
 
+def remove_nans3(a, b, c):
+    """
+    Remove nans from three arrays if there is a nan in the same position in either of the other arrays
+    :param a:
+    :param b:
+    :param c:
+    :return:
+    """
+    a = numpy.asarray(a)
+    b = numpy.asarray(b)
+    c = numpy.asarray(c)
+
+    mask = ~numpy.isnan(a) & ~numpy.isnan(b) & ~numpy.isnan(c)
+    a = a[mask]
+    b = b[mask]
+    c = c[mask]
+
+    return a, b, c
+
+
 def ols(sim, obs):
     """
 
