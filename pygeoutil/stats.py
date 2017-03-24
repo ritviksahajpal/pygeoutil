@@ -39,11 +39,12 @@ def remove_nans3(a, b, c):
     return a, b, c
 
 
-def ols(sim, obs):
+def ols(sim, obs, weights=1.0):
     """
 
     :param sim: predicted (or simulated)
     :param obs: observed, expected
+    :param weights:
     :return:
     """
 
@@ -51,7 +52,7 @@ def ols(sim, obs):
     sim = numpy.asarray(sim)
     obs, sim = remove_nans(obs, sim)
 
-    results = sm.OLS(sim, sm.add_constant(obs), missing='drop').fit()
+    results = sm.WLS(sim, sm.add_constant(obs), weights=weights, missing='drop').fit()
 
     return results
 
