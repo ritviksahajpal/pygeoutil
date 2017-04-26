@@ -1370,7 +1370,7 @@ def subtract_netcdf(left_hndl, right_hndl, left_var, right_var=None, date=-1, tm
     return diff_data
 
 
-def avg_netcdf(path_nc, var, do_area_wt=False, area_data='', date=-1, tme_name='time'):
+def avg_netcdf(path_nc, var, do_area_wt=False, area_data='', date=-1, subset_arr=None, tme_name='time'):
     """
     Average across netCDF, can also do area based weighted average
     Args:
@@ -1386,30 +1386,29 @@ def avg_netcdf(path_nc, var, do_area_wt=False, area_data='', date=-1, tme_name='
 
     """
     arr_avg = []
-    hndl_nc = open_or_die(path_nc)
+    with open_or_die(path_nc) as hndl_nc:
 
-    ts = get_nc_var1d(hndl_nc, tme_name)  # time-series
-    if date == -1:  # Plot either the last year {len(ts)-1} or whatever year the user wants
-        iyr = ts - ts[0]
-    else:
-        iyr = date - ts[0]
-
-    if do_area_wt:
-        max_ar = np.ma.max(area_data)
-
-        if date == -1:
-            for yr in iyr:
-                arr_avg.append(np.ma.sum(get_nc_var3d(hndl_nc, var=var, year=yr) * area_data) / max_ar)
+        ts = get_nc_var1d(hndl_nc, tme_name)  # time-series
+        if date == -1:  # Plot either the last year {len(ts)-1} or whatever year the user wants
+            iyr = ts - ts[0]
         else:
-            arr_avg.append((get_nc_var3d(hndl_nc, var=var, year=iyr) * area_data) / max_ar)
-    else:
-        if date == -1:
-            for yr in iyr:
-                arr_avg.append(np.ma.mean(get_nc_var3d(hndl_nc, var=var, year=yr)))
-        else:
-            arr_avg.append(get_nc_var3d(hndl_nc, var=var, year=yr))
+            iyr = date - ts[0]
 
-    hndl_nc.close()
+        if do_area_wt:
+            max_ar = np.ma.max(area_data)
+
+            if date == -1:
+                for yr in iyr:
+                    arr_avg.append(np.ma.sum(get_nc_var3d(hndl_nc, var=var, year=yr, subset_arr=subset_arr) * area_data) / max_ar)
+            else:
+                arr_avg.append((get_nc_var3d(hndl_nc, var=var, year=iyr, subset_arr=subset_arr) * area_data) / max_ar)
+        else:
+            if date == -1:
+                for yr in iyr:
+                    arr_avg.append(np.ma.mean(get_nc_var3d(hndl_nc, var=var, year=yr, subset_arr=subset_arr)))
+            else:
+                arr_avg.append(get_nc_var3d(hndl_nc, var=var, year=yr, subset_arr=subset_arr))
+
     return arr_avg
 
 
@@ -1467,7 +1466,7 @@ def sum_netcdf(path_nc, var, do_area_wt=False, arr_area=None, date=-1, tme_name=
     iyr = ts - ts[0] if date == -1 else [date - ts[0]]
 
     # Multiply fraction of grid cell by area
-    for yr in tqdm(iyr, desc='sum netcdf', disable=(len(iyr) < 2)):
+    for yr in iyr:
         if do_area_wt:
             arr_sum.append(np.ma.sum(get_nc_var3d(hndl_nc, var=var, year=yr, subset_arr=subset_arr) * arr_area))
         else:
