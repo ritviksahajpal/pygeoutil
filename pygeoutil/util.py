@@ -1181,7 +1181,7 @@ def create_nc_var(hndl_nc, var, name_var, dims, fill_val=np.NaN):
     return out_var_nc
 
 
-def sum_area_nc(path_nc, var_name, carea, year):
+def sum_area_nc(path_nc, var_name, carea, year, subset_arr=None):
     """
 
     Args:
@@ -1195,7 +1195,7 @@ def sum_area_nc(path_nc, var_name, carea, year):
     """
     hndl_nc = open_or_die(path_nc)
 
-    return np.ma.sum(carea * (get_nc_var3d(hndl_nc, var_name, year)))
+    return np.ma.sum(carea * (get_nc_var3d(hndl_nc, var_name, year, subset_arr=subset_arr)))
 
 
 def convert_arr_to_nc(arr, var_name, lat, lon, out_nc_path, tme=''):
