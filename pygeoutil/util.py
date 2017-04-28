@@ -456,7 +456,7 @@ def extract_from_ascii(asc, ulat=90.0, llat=-90.0, llon=-180.0, rlon=180.0, res=
     return asc_subset
 
 
-def avg_hist_asc(asc_data, bins=[], use_pos_vals=True, subset_asc=None, do_area_wt=False, area_data=''):
+def avg_hist_asc(asc_data, bins=[], use_pos_vals=True, subset_asc=None, do_area_wt=False, area_data=None):
     """
     Create a weighted average array, return histogram and bin edge values
     Args:
@@ -476,7 +476,7 @@ def avg_hist_asc(asc_data, bins=[], use_pos_vals=True, subset_asc=None, do_area_
 
     if do_area_wt:
         # Multiply fraction of grid cell by area
-        arr_avg = asc_data * area_data
+        arr_avg = asc_data  # * area_data
     else:
         arr_avg = asc_data
 
@@ -485,7 +485,7 @@ def avg_hist_asc(asc_data, bins=[], use_pos_vals=True, subset_asc=None, do_area_
         arr_avg = np.ma.masked_where(arr_avg >= 0.0, arr_avg, 0.0)
 
     if len(bins):
-        return np.histogram(arr_avg, bins=bins)
+        return np.histogram(arr_avg.data, bins=bins, range=(np.nanmin(arr_avg.data), np.nanmax(arr_avg.data)), weights=area_data)
     else:
         return np.histogram(arr_avg)
 
