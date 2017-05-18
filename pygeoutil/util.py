@@ -981,14 +981,14 @@ def get_nc_var3d(hndl_nc, var, year, subset_arr=None):
 
     """
     # TODO: Function assumes that subset_arr is boolean i.e. 1 or 0 (if not, errors can happen)
-    use_subset_arr = subset_arr is None
+    use_subset_arr = True if isinstance(subset_arr, np.ndarray) else False
 
     # Return if number of dimensions is not 3
     if len(hndl_nc.variables[var].dimensions) != 3:
         return np.nan
 
     # If subset arr exists, then it should have 2 dimensions (x and y)
-    if not use_subset_arr:
+    if use_subset_arr:
         ndim = subset_arr.ndim
         if ndim != 2:
             raise IOError('Incorrect dimensions of subset array (should be 2): ' + str(ndim))
@@ -996,7 +996,7 @@ def get_nc_var3d(hndl_nc, var, year, subset_arr=None):
     try:
         val = hndl_nc.variables[var][year, :, :]
 
-        if not use_subset_arr:
+        if use_subset_arr:
             # Shapes should match for netCDF slice and subset array
             if val.shape != subset_arr.shape:
                 raise AttributeError('Shapes do not match for netCDF slice and subset array')
@@ -1441,11 +1441,11 @@ def avg_hist_netcdf(path_nc, var, bins=[], use_pos_vals=True, subset_asc=None, d
                         do_area_wt=do_area_wt, area_data=area_data)
 
 
-def sum_netcdf(path_nc, var, do_area_wt=False, arr_area=None, date=-1, tme_name='time', subset_arr=None):
+def sum_netcdf(path_or_hndl_nc, var, do_area_wt=False, arr_area=None, date=-1, tme_name='time', subset_arr=None):
     """
     Sum across netCDF, can also do area based weighted sum
     Args:
-        path_nc: path to netCDF file
+        path_or_hndl_nc: path to netCDF file
         var: variable in netCDF file to sum
         do_area_wt: Should we multiply grid cell area with fraction of grid cell
         arr_area: Array specifying area of each cell
@@ -1458,7 +1458,10 @@ def sum_netcdf(path_nc, var, do_area_wt=False, arr_area=None, date=-1, tme_name=
 
     """
     arr_sum = []
-    hndl_nc = open_or_die(path_nc)
+    hndl_nc = path_or_hndl_nc
+
+    if isinstance(path_or_hndl_nc, str):
+        hndl_nc = open_or_die(path_or_hndl_nc)
 
     ts = get_nc_var1d(hndl_nc, var=tme_name)  # time-series
 

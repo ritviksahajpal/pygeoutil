@@ -9,8 +9,9 @@ import subprocess
 import pandas as pd
 import numpy as np
 import sys
-from . import ggeo
+from cachetools import cached
 
+from . import ggeo
 from tsgettoolbox import tsgettoolbox
 from geopy.geocoders import Nominatim
 from shutil import copyfile
@@ -275,6 +276,7 @@ def get_geo_idx(val_dd, array_dd):
     return (np.abs(array_dd - val_dd)).argmin()
 
 
+@cached(cache={})
 def get_latlon_location(loc):
     """
     Get latitude/longitude of location
