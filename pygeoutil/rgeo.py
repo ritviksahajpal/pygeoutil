@@ -12,7 +12,6 @@ import sys
 from cachetools import cached
 
 from . import ggeo
-from tsgettoolbox import tsgettoolbox
 from geopy.geocoders import Nominatim
 from shutil import copyfile
 import shapefile
@@ -130,6 +129,7 @@ def get_ts(lat, lon, name_var, var=None, sub_var=None, start_date=None, end_date
     :param end_date: 
     :return: 
     """
+    from tsgettoolbox import tsgettoolbox
     if name_var == 'modis':
         df = tsgettoolbox.modis(lat=lat,
                                 lon=lon,
