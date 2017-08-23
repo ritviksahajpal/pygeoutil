@@ -295,8 +295,11 @@ def get_latlon_location(loc):
     except Exception as e:
         # TODO Be smarter about catching exceptions here, needs internet connection to work
         # Default behaviour is to exit
-        print('Geolocator not working: ' + loc + ' ' + str(e))
-        return 0.0, 0.0  # Equator is default
+        import geocoder
+        g = geocoder.google(loc)
+        lat, lon = g.latlng
+        # print('Geolocator not working: ' + loc + ' ' + str(e))
+        # return 0.0, 0.0  # Equator is default
 
     return lat, lon
 
@@ -458,7 +461,7 @@ def get_grid_cell_area(nrows, ncols):
 
 def get_country_lat_lon_extent(alpha2):
     """
-
+    See https://data.humdata.org/dataset/bounding-boxes-for-countries/resource/aec5d77d-095a-4d42-8a13-5193ec18a6a9
     Args:
         alpha2:
 
@@ -471,45 +474,44 @@ def get_country_lat_lon_extent(alpha2):
     if alpha2 == 'united_states_of_america':
         return [-130, -60, 25, 48]
     elif alpha2 == 'russian_federation':
-        return [22, 179, 35, 83]
+        # -179.985	38.083	179.917	86.217
+        return [22, 179, 38, 86.5]
     elif alpha2 == 'china':
         return [70, 138, 12, 55]
     elif alpha2 == 'india':
         return [64, 100, 4, 37]
     elif alpha2 == 'argentina':
-        return [-80, -50, -16, -64]
+        return [-74.0, -53., -59., -21.]
     elif alpha2 == 'brazil':
         return [-75, -35, 5, -35]
     elif alpha2 == 'canada':
         return [-140, -50, 40, 70]
     elif alpha2 == 'egypt':
-        return [-80, -50, -16, -64]
+        return [13., 37., 5., 51.]
     elif alpha2 == 'france':
-        return [-80, -50, -16, -64]
+        return [-5.5, 9.0, 41.0, 51.5]
     elif alpha2 == 'mexico':
         return [-120, -85, 15, 35]
     elif alpha2 == 'south_africa':
         return [10, 35, -20, -35]
-    elif alpha2 == 'spain':
-        return [-80, -50, -16, -64]
-    elif alpha2 == 'australia':
-        return [-80, -50, -16, -64]
     elif alpha2 == 'ukraine':
-        return [-80, -50, -16, -64]
+        return [18.8, 76.5, 37.5, 65.]
     elif alpha2 == 'uk_of_great_britain_and_northern_ireland':
-        return [-80, -50, -16, -64]
+        return [-14., 4., 48.5, 64.5]
     elif alpha2 == 'germany':
-        return [-80, -50, -16, -64]
+        return [5.8, 15.5, 45.5, 55.5]
     elif alpha2 == 'spain':
-        return [-80, -50, -16, -64]
+        return [-18.5, 6.5, 27.5, 44.]
     elif alpha2 == 'kazakhstan':
-        return [-80, -50, -16, -64]
+        return [46.5, 90.0, 40.4, 55.5]
     elif alpha2 == 'hungary':
-        return [-80, -50, -16, -64]
+        return [16.1, 22.5, 45.5, 49.0]
     elif alpha2 == 'italy':
-        return [-80, -50, -16, -64]
+        return [1.1, 54.5, 28.5, 49.5]
     elif alpha2 == 'indonesia':
-        return [-80, -50, -16, -64]
+        return [0., 142., -11., 15.]
+    elif alpha2 == 'australia':
+        return [112.0, 168.0, -9.0, -55.0]
     else:
         return [-180, 180, -90, 90]
 

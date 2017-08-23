@@ -13,6 +13,7 @@ from . import rgeo
 import xarray as xr
 import numpy as np
 import pandas as pd
+import dask.dataframe as dd
 import netCDF4
 from skimage.measure import block_reduce
 from tqdm import tqdm
@@ -723,7 +724,7 @@ def iter_loadtxt(filename, delimiter=',', skiprows=0, dtype=float):
 
 
 def open_or_die(path_file, perm='r', csv_header=0, skiprows=0, delimiter=' ', mask_val=-9999.0, use_xarray=False,
-                format='', **kwargs):
+                format='', use_dask=False, **kwargs):
     """
     Open file or quit gracefully
     Args:
@@ -748,10 +749,14 @@ def open_or_die(path_file, perm='r', csv_header=0, skiprows=0, delimiter=' ', ma
             import chardet
             with open(path_file, 'rb') as f:
                 result = chardet.detect(f.read())  # or readline if the file is large
-            df = pd.read_csv(path_file, header=csv_header, encoding=result['encoding'])
+
+            if use_dask:
+                df = dd.read_csv(path_file, header=csv_header, encoding=result['encoding'])
+            else:
+                df = pd.read_csv(path_file, header=csv_header, encoding=result['encoding'])
             return df
         elif os.path.splitext(path_file)[1] == '.xlsx' or os.path.splitext(path_file)[1] == '.xls':
-            df = pd.ExcelFile(path_file, header=csv_header)
+            df = pd.ExcelFile(path_file, header=csv_header, encoding='utf-8')
             return df
         elif os.path.splitext(path_file)[1] == '.asc':
             data = iter_loadtxt(path_file, delimiter=delimiter, skiprows=skiprows)
@@ -1669,7 +1674,7 @@ def add_nc_vars_to_new_var(path_inp, _vars, new_var='tmp', fill_val=0.0):
     with open_or_die(path_inp, perm='r+') as hndl_inp:
         for idx, (name_var, var) in enumerate(hndl_inp.variables.items()):
             if name_var in _vars:
-                out_var = hndl_inp.createVariable(new_var, var.datatype, var.dimensions, zlib=True, fill_value=np.NaN)
+                out_var = hndl_inp.createVariable(new_var, var.datatype, var.dimensions, zlib=True, fill_value=fill_val)
                 out_var.setncatts({k: var.getncattr(k) for k in var.ncattrs()})
                 break
 
@@ -1699,7 +1704,7 @@ def replace_negative_vals_in_nc(path_inp):
             hndl_inp[name_var][:][hndl_inp[name_var][:] < 0] = 0.0
 
 
-def create_new_var_in_nc(path_inp, example_var, new_var='tmp'):
+def create_new_var_in_nc(path_inp, example_var, new_var='tmp', fill_val=0.0):
     """
     Add new_var to existing netCDF, fill with 0's and assign it dimension and datatype of existing variable
     Args:
@@ -1722,6 +1727,9 @@ def create_new_var_in_nc(path_inp, example_var, new_var='tmp'):
 
         # Assign data to new variable
         out_var[:] = np.zeros_like(hndl_inp.variables[example_var])
+
+        if fill_val != 0.0:
+            out_var[:] = fill_val
 
 
 def modify_nc_att(path_inp, vars, att_to_modify, new_att_value):
