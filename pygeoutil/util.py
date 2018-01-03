@@ -13,7 +13,6 @@ from . import rgeo
 import xarray as xr
 import numpy as np
 import pandas as pd
-import dask.dataframe as dd
 import netCDF4
 from skimage.measure import block_reduce
 from tqdm import tqdm
@@ -751,6 +750,7 @@ def open_or_die(path_file, perm='r', csv_header=0, skiprows=0, delimiter=' ', ma
                 result = chardet.detect(f.read())  # or readline if the file is large
 
             if use_dask:
+                import dask.dataframe as dd
                 df = dd.read_csv(path_file, header=csv_header, encoding=result['encoding'])
             else:
                 df = pd.read_csv(path_file, header=csv_header, encoding=result['encoding'])
