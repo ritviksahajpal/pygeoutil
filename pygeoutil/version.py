@@ -66,4 +66,8 @@ VERSION = __version__
 PACKAGES = ['pygeoutil',
             'pygeoutil.tests']
 PACKAGE_DATA = {'pygeoutil': [pjoin('data', '*')]}
-REQUIRES = ["numpy"]
+REQUIRES = ['numpy', 'docutils', 'Fiona', 'GDAL', 'geopy', 'matplotlib', 'mock', 'pandas', 'PCSE', 'rasterio',
+            'scikit_image', 'Sphinx', 'statsmodels', 'tqdm', 'tsgettoolbox', 'xarray', 'yagmail', 'Pillow', 'chardet',
+            'netCDF4', 'pyshp']
+
+
