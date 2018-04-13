@@ -740,11 +740,13 @@ def open_or_die(path_file, perm='r', csv_header=0, skiprows=0, delimiter=' ', ma
         Handle to file (netCDF), or dataframe (csv) or numpy array
 
     """
+    ext = os.path.splitext(path_file)[1]  # Get file extension
+
     try:
-        if os.path.splitext(path_file)[1] in ['.nc', '.nc4'] and not use_xarray:
+        if ext in ['.nc', '.nc4'] and not use_xarray:
             hndl = netCDF4.Dataset(path_file, perm, format='NETCDF4')
             return hndl
-        elif os.path.splitext(path_file)[1] == '.csv':
+        elif ext == '.csv':
             import chardet
             with open(path_file, 'rb') as f:
                 result = chardet.detect(f.read())  # or readline if the file is large
@@ -755,22 +757,26 @@ def open_or_die(path_file, perm='r', csv_header=0, skiprows=0, delimiter=' ', ma
             else:
                 df = pd.read_csv(path_file, header=csv_header, encoding=result['encoding'])
             return df
-        elif os.path.splitext(path_file)[1] == '.xlsx' or os.path.splitext(path_file)[1] == '.xls':
+        elif ext in ['.xlsx', '.xls']:
             df = pd.ExcelFile(path_file, header=csv_header, encoding='utf-8')
             return df
-        elif os.path.splitext(path_file)[1] == '.asc':
+        elif ext == '.asc':
             data = iter_loadtxt(path_file, delimiter=delimiter, skiprows=skiprows)
             data = np.ma.masked_values(data, mask_val)
             return data
-        elif os.path.splitext(path_file)[1] == '.txt':
+        elif ext == '.txt':
             data = iter_loadtxt(path_file, delimiter=delimiter, skiprows=skiprows)
             data = np.ma.masked_values(data, mask_val)
             return data
-        elif os.path.splitext(path_file)[1] in ['.nc', '.nc4'] and use_xarray:
+        elif ext == '.cfg':
+            import io
+            data = io.open(path_file)
+            return data
+        elif ext in ['.nc', '.nc4'] and use_xarray:
             hndl = xr.open_dataset(path_file, **kwargs)
             return hndl
         else:
-            raise IOError('Invalid file type ' + os.path.splitext(path_file)[1])
+            raise IOError('Invalid file type ' + ext)
     except:
         raise IOError('Error opening file ' + path_file)
 
