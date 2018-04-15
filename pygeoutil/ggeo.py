@@ -2101,13 +2101,11 @@ def _make_logger_callback(message):
 
 def _is_raster_path_band_formatted(raster_path_band):
     """Returns true if raster path band is a (str, int) tuple/list."""
-    import types
-
     if not isinstance(raster_path_band, (list, tuple)):
         return False
     elif len(raster_path_band) != 2:
         return False
-    elif not isinstance(raster_path_band[0], types.StringTypes):
+    elif not isinstance(raster_path_band[0], str):
         return False
     elif not isinstance(raster_path_band[1], int):
         return False
