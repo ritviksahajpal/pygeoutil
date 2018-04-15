@@ -2209,7 +2209,7 @@ def zonal_statistics(
     raster_info = get_raster_info(base_raster_path_band[0])
     # -1 here because bands are 1 indexed
     print(raster_info)
-    raster_nodata = raster_info['nodata'][base_raster_path_band[1]-1]
+    raster_nodata = None
     with tempfile.NamedTemporaryFile(
             prefix='clipped_raster', delete=False,
             dir=working_dir) as clipped_raster_file:
