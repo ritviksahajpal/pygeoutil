@@ -459,11 +459,11 @@ def get_grid_cell_area(nrows, ncols):
     return cell_area
 
 
-def get_country_lat_lon_extent(alpha2):
+def get_country_lat_lon_extent(country):
     """
     See https://data.humdata.org/dataset/bounding-boxes-for-countries/resource/aec5d77d-095a-4d42-8a13-5193ec18a6a9
     Args:
-        alpha2:
+        country:
 
     Returns: longitude(left) longitude(right), latitude (bottom), latitude(top)
 
@@ -471,49 +471,51 @@ def get_country_lat_lon_extent(alpha2):
     #
     # 'mexico', 'south_africa', 'spain', 'australia', 'ukraine', 'uk_of_great_britain_and_northern_ireland',
     # 'germany','spain', 'kazakhstan', 'hungary', 'italy','indonesia'
-    if alpha2 == 'united_states_of_america':
+    if country == 'united_states_of_america':
         return [-130, -60, 25, 48]
-    elif alpha2 == 'russian_federation':
+    elif country == 'russian_federation':
         # -179.985	38.083	179.917	86.217
         return [22., 90., 42., 60.]
-    elif alpha2 == 'china':
+    elif country == 'china':
         return [70, 138, 12, 55]
-    elif alpha2 == 'india':
+    elif country == 'india':
         return [64, 100, 4, 37]
-    elif alpha2 == 'argentina':
+    elif country == 'argentina':
         return [-74.0, -53., -59., -21.]
-    elif alpha2 == 'brazil':
+    elif country == 'brazil':
         return [-75, -35, 5, -35]
-    elif alpha2 == 'canada':
+    elif country == 'canada':
         return [-140, -50, 40, 70]
-    elif alpha2 == 'egypt':
+    elif country == 'egypt':
         return [13., 37., 5., 51.]
-    elif alpha2 == 'france':
+    elif country == 'france':
         return [-5.5, 9.0, 41.0, 51.5]
-    elif alpha2 == 'mexico':
+    elif country == 'mexico':
         return [-120, -85, 15, 35]
-    elif alpha2 == 'south_africa':
+    elif country == 'south_africa':
         return [10, 35, -20, -35]
-    elif alpha2 == 'ukraine':
+    elif country == 'ukraine':
         return [18.8, 76.5, 37.5, 65.]
-    elif alpha2 == 'uk_of_great_britain_and_northern_ireland':
+    elif country == 'uk_of_great_britain_and_northern_ireland':
         return [-14., 4., 48.5, 64.5]
-    elif alpha2 == 'germany':
+    elif country == 'germany':
         return [5.8, 15.5, 45.5, 55.5]
-    elif alpha2 == 'spain':
+    elif country == 'spain':
         return [-18.5, 6.5, 27.5, 44.]
-    elif alpha2 == 'kazakhstan':
+    elif country == 'kazakhstan':
         return [46.5, 90.0, 40.4, 55.5]
-    elif alpha2 == 'hungary':
+    elif country == 'hungary':
         return [16.1, 22.5, 45.5, 49.0]
-    elif alpha2 == 'italy':
+    elif country == 'italy':
         return [1.1, 54.5, 28.5, 49.5]
-    elif alpha2 == 'indonesia':
+    elif country == 'indonesia':
         return [0., 142., -11., 15.]
-    elif alpha2 == 'australia':
+    elif country == 'australia':
         return [112.0, 168.0, -9.0, -55.0]
-    else:
+    elif country == 'world':
         return [-180, 180, -90, 90]
+    else:
+        return [-180, 180, -60, 85]  # Do now show antarctica, arctic
 
 
 def clip_raster(path_raster, path_mask, path_out_ras):
