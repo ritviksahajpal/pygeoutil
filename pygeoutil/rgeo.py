@@ -567,5 +567,12 @@ def select(path_inp, name_col, val, path_out):
             #
             # sink.write(filtered[0])
 
+
+def zonal_statistics(in_zone_data, zone_field, in_value_raster):
+    dict_zonal = ggeo.zonal_statistics(in_zone_data, in_value_raster, zone_field)
+
+    return dict_zonal
+
+
 if __name__ == '__main__':
     pass
