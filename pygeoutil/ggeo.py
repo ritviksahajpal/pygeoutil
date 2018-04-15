@@ -2208,6 +2208,7 @@ def zonal_statistics(
     # clip base raster to aggregating vector intersection
     raster_info = get_raster_info(base_raster_path_band[0])
     # -1 here because bands are 1 indexed
+    print(raster_info['nodata'])
     raster_nodata = raster_info['nodata'][base_raster_path_band[1]-1]
     with tempfile.NamedTemporaryFile(
             prefix='clipped_raster', delete=False,
