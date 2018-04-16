@@ -740,12 +740,12 @@ def open_or_die(path_file, perm='r', csv_header=0, skiprows=0, delimiter=' ', ma
         Handle to file (netCDF), or dataframe (csv) or numpy array
 
     """
+    hndl = None
     ext = os.path.splitext(path_file)[1]  # Get file extension
 
     try:
         if ext in ['.nc', '.nc4'] and not use_xarray:
             hndl = netCDF4.Dataset(path_file, perm, format='NETCDF4')
-            return hndl
         elif ext == '.csv':
             import chardet
             with open(path_file, 'rb') as f:
@@ -753,32 +753,30 @@ def open_or_die(path_file, perm='r', csv_header=0, skiprows=0, delimiter=' ', ma
 
             if use_dask:
                 import dask.dataframe as dd
-                df = dd.read_csv(path_file, header=csv_header, encoding=result['encoding'])
+                hndl = dd.read_csv(path_file, header=csv_header, encoding=result['encoding'])
             else:
-                df = pd.read_csv(path_file, header=csv_header, encoding=result['encoding'])
-            return df
+                hndl = pd.read_csv(path_file, header=csv_header, encoding=result['encoding'])
         elif ext in ['.xlsx', '.xls']:
-            df = pd.ExcelFile(path_file, header=csv_header, encoding='utf-8')
-            return df
+            hndl = pd.ExcelFile(path_file, header=csv_header, encoding='utf-8')
         elif ext == '.asc':
-            data = iter_loadtxt(path_file, delimiter=delimiter, skiprows=skiprows)
-            data = np.ma.masked_values(data, mask_val)
-            return data
+            hndl = iter_loadtxt(path_file, delimiter=delimiter, skiprows=skiprows)
+            hndl = np.ma.masked_values(hndl, mask_val)
         elif ext == '.txt':
-            data = iter_loadtxt(path_file, delimiter=delimiter, skiprows=skiprows)
-            data = np.ma.masked_values(data, mask_val)
-            return data
+            hndl = iter_loadtxt(path_file, delimiter=delimiter, skiprows=skiprows)
+            hndl = np.ma.masked_values(hndl, mask_val)
         elif ext == '.cfg':
             import io
-            data = io.open(path_file)
-            return data
+            hndl = io.open(path_file)
         elif ext in ['.nc', '.nc4'] and use_xarray:
             hndl = xr.open_dataset(path_file, **kwargs)
-            return hndl
+        elif ext in ['.tif']:
+            hndl = rasterio.open(path_file)
         else:
             raise IOError('Invalid file type ' + ext)
     except:
         raise IOError('Error opening file ' + path_file)
+
+    return hndl
 
 
 def get_ascii_plot_parameters(asc, step_length=10.0):
