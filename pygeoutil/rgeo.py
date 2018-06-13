@@ -513,7 +513,7 @@ def get_country_lat_lon_extent(country):
     elif country == 'australia':
         return [112.0, 168.0, -9.0, -55.0]
     elif country == 'world':
-        return [-180, 180, -90, 90]
+        return [-180, 180, -60, 85]
     else:
         return [-180, 180, -60, 85]  # Do now show antarctica, arctic
 
