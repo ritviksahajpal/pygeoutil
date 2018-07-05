@@ -15,6 +15,9 @@ import netCDF4
 from skimage.measure import block_reduce
 from tqdm import tqdm
 
+import cartopy
+import cartopy.crs as ccrs
+from cartopy.feature import ShapelyFeature
 from . import rgeo
 
 # Ignore divide by 0 errors.
