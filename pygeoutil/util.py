@@ -8,14 +8,14 @@ import calendar
 import subprocess
 import rasterio
 
-from . import rgeo
-
 import xarray as xr
 import numpy as np
 import pandas as pd
 import netCDF4
 from skimage.measure import block_reduce
 from tqdm import tqdm
+
+from . import rgeo
 
 # Ignore divide by 0 errors.
 np.seterr(divide='ignore', invalid='ignore')
