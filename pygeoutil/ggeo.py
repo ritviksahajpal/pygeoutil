@@ -2,6 +2,10 @@ import os
 import pdb
 import time
 import errno
+import shapely.wkt
+import shapely.ops
+from shapely import speedups
+import shapely.prepared
 import subprocess
 import logging
 import tempfile
@@ -2373,10 +2377,6 @@ def calculate_disjoint_polygon_set(vector_path, layer_index=0):
         subset_list (list): list of sets of FIDs from vector_path
     """
     import heapq
-    import shapely.wkt
-    import shapely.ops
-    from shapely import speedups
-    import shapely.prepared
 
     vector = gdal.OpenEx(vector_path)
     vector_layer = vector.GetLayer()

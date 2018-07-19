@@ -8,14 +8,14 @@ import calendar
 import subprocess
 import rasterio
 
-from . import rgeo
-
 import xarray as xr
 import numpy as np
 import pandas as pd
 import netCDF4
 from skimage.measure import block_reduce
 from tqdm import tqdm
+
+from . import rgeo
 
 # Ignore divide by 0 errors.
 np.seterr(divide='ignore', invalid='ignore')
@@ -1377,6 +1377,110 @@ def subtract_netcdf(left_hndl, right_hndl, left_var, right_var=None, date=-1, tm
     diff_data = left_data - right_data
 
     return diff_data
+
+
+def xarray_average(data, dim=None, weights=None, **kwargs):
+    """
+    github.com/xylar/MPAS-Analysis/blob/68a8b2f1f2d3e962c3b37584e29936f9300943ee/mpas_analysis/shared/averaging/averaging.py
+    weighted average for xarray objects
+    Parameters
+    ----------
+    data : Dataset or DataArray
+        the xarray object to average over
+    dim : str or sequence of str, optional
+        Dimension(s) over which to apply average.
+    weights : DataArray
+        weights to apply. Shape must be broadcastable to shape of data.
+    kwargs : dict
+        Additional keyword arguments passed on to internal calls to ``mean``
+        or ``sum`` (performed on the data set or data array but *not* those
+        performed on the weights)
+    Returns
+    -------
+    reduced : Dataset or DataArray
+        New xarray object with average applied to its data and the indicated
+        dimension(s) removed.
+    Authors
+    -------
+    Mathias Hauser (https://github.com/mathause)
+    Xylar Asay-Davis
+    """
+
+    if isinstance(data, xr.Dataset):
+        return _average_ds(data, dim, weights, **kwargs)
+    elif isinstance(data, xr.DataArray):
+        return _average_da(data, dim, weights, **kwargs)
+    else:
+        raise ValueError("date must be an xarray Dataset or DataArray")
+
+
+def _average_da(da, dim=None, weights=None, **kwargs):
+    """
+    weighted average for DataArrays
+    Parameters
+    ----------
+    dim : str or sequence of str, optional
+        Dimension(s) over which to apply average.
+    weights : DataArray
+        weights to apply. Shape must be broadcastable to shape of self.
+    kwargs : dict
+        Additional keyword arguments passed on to internal calls to ``mean``
+        or ``sum`` (performed on the data set or data array but *not* those
+        performed on the weights)
+    Returns
+    -------
+    reduced : DataArray
+        New DataArray with average applied to its data and the indicated
+        dimension(s) removed.
+    Authors
+    -------
+    Mathias Hauser (https://github.com/mathause)
+    Xylar Asay-Davis
+    """
+
+    if weights is None:
+        return da.mean(dim, **kwargs)
+    else:
+        if not isinstance(weights, xr.DataArray):
+            raise ValueError("weights must be a DataArray")
+
+        # if NaNs are present, we need individual weights
+        if da.notnull().any():
+            total_weights = weights.where(da.notnull()).sum(dim=dim)
+        else:
+            total_weights = weights.sum(dim)
+
+        return (da * weights).sum(dim, **kwargs) / total_weights
+
+
+def _average_ds(ds, dim=None, weights=None, **kwargs):
+    """
+    weighted average for Datasets
+    Parameters
+    ----------
+    dim : str or sequence of str, optional
+        Dimension(s) over which to apply average.
+    weights : DataArray
+        weights to apply. Shape must be broadcastable to shape of data.
+    kwargs : dict
+        Additional keyword arguments passed on to internal calls to ``mean``
+        or ``sum`` (performed on the data set or data array but *not* those
+        performed on the weights)
+    Returns
+    -------
+    reduced : Dataset
+        New Dataset with average applied to its data and the indicated
+        dimension(s) removed.
+    Authors
+    -------
+    Mathias Hauser (https://github.com/mathause)
+    Xylar Asay-Davis
+    """
+
+    if weights is None:
+        return ds.mean(dim, **kwargs)
+    else:
+        return ds.apply(_average_da, dim=dim, weights=weights, **kwargs)
 
 
 def avg_netcdf(path_nc, var, do_area_wt=False, area_data='', date=-1, subset_arr=None, tme_name='time'):
