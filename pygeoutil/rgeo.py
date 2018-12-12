@@ -511,7 +511,7 @@ def get_country_lat_lon_extent(country):
     elif country == 'indonesia':
         return [0., 142., -11., 15.]
     elif country == 'australia':
-        return [112.0, 168.0, -9.0, -55.0]
+        return [112.0, 168.0, -9.0, -45.0]
     elif country in ['vietnam', 'Viet nam', 'viet_nam', 'Viet Nam']:
         return [100., 110., 8., 24.]
     elif country == 'world':
