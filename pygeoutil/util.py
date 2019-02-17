@@ -757,7 +757,7 @@ def open_or_die(path_file, perm='r', csv_header=0, skiprows=0, delimiter=' ', ma
             else:
                 hndl = pd.read_csv(path_file, header=csv_header, encoding=result['encoding'])
         elif ext in ['.xlsx', '.xls']:
-            hndl = pd.ExcelFile(path_file, header=csv_header, encoding='utf-8')
+            hndl = pd.ExcelFile(path_file)
         elif ext == '.asc':
             hndl = iter_loadtxt(path_file, delimiter=delimiter, skiprows=skiprows)
             hndl = np.ma.masked_values(hndl, mask_val)
