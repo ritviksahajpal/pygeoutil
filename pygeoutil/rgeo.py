@@ -96,8 +96,8 @@ def get_met(lat, lon, start_date=None, end_date=None):
     :return: 
     """
     from pcse.db import NASAPowerWeatherDataProvider
-    wdp = NASAPowerWeatherDataProvider(lat, lon, start_date, end_date)
-    _df = wdp._query_NASAPower_server(lat, lon, start_date, end_date)
+    wdp = NASAPowerWeatherDataProvider(lat, lon, True)
+    _df = wdp._query_NASAPower_server(lat, lon)
 
     _df = [x.decode("utf-8") for x in _df]  # Decode from bytes to strings
     _ix = [i for i, s in enumerate(_df) if 'END HEADER' in s][0]  # Find end of header
