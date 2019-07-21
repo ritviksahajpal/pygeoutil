@@ -6,12 +6,12 @@ import datetime
 import sys
 import calendar
 import subprocess
+import netCDF4
 import rasterio
 
 import xarray as xr
 import numpy as np
 import pandas as pd
-import netCDF4
 from skimage.measure import block_reduce
 from tqdm import tqdm
 
