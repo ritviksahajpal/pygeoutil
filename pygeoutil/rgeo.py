@@ -495,7 +495,7 @@ def get_country_lat_lon_extent(country):
     elif country == 'south_africa':
         return [10, 35, -20, -35]
     elif country == 'ukraine':
-        return [22, 40.5, 43, 53.]
+        return [22, 40.5, 43.5, 53.]
     elif country == 'uk_of_great_britain_and_northern_ireland':
         return [-14., 4., 48.5, 64.5]
     elif country == 'germany':
