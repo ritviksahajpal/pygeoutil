@@ -515,7 +515,7 @@ def get_country_lat_lon_extent(country):
     elif country in ['vietnam', 'Viet nam', 'viet_nam', 'Viet Nam']:
         return [100., 110., 8., 24.]
     elif country == 'world':
-        return [-180, 180, -60, 85]
+        return [-180, 180, -90, 90]
     else:
         return [-180, 180, -60, 85]  # Do now show antarctica, arctic
 
