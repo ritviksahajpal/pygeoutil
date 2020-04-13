@@ -11,10 +11,10 @@ import gdal
 import gdalconst
 import pandas as pd
 import numpy as np
-import pygeoprocessing
 import sys
 from cachetools import cached
 
+from . import ggeo
 from geopy.geocoders import Nominatim
 from shutil import copyfile
 import shapefile
@@ -194,7 +194,7 @@ def get_properties(path_ds, name_property):
     Returns:
 
     """
-    dict_properties = pygeoprocessing.get_raster_info(path_ds)
+    dict_properties = ggeo.get_raster_info(path_ds)
 
     return dict_properties[name_property]
 
@@ -223,59 +223,6 @@ def get_values_rat_column(path_ds, name_col='Value'):
 
     #return dict_values.get(name_key[0], None)
 
-def _gdal_to_numpy_type(band):
-    """Calculates the equivalent numpy datatype from a GDAL raster band type
-
-        band - GDAL band
-
-        returns numpy equivalent of band.DataType"""
-
-    gdal_type_to_numpy_lookup = {
-        gdal.GDT_Int16: numpy.int16,
-        gdal.GDT_Int32: numpy.int32,
-        gdal.GDT_UInt16: numpy.uint16,
-        gdal.GDT_UInt32: numpy.uint32,
-        gdal.GDT_Float32: numpy.float32,
-        gdal.GDT_Float64: numpy.float64
-    }
-
-    if band.DataType in gdal_type_to_numpy_lookup:
-        return gdal_type_to_numpy_lookup[band.DataType]
-
-    #only class not in the lookup is a Byte but double check.
-    if band.DataType != gdal.GDT_Byte:
-        raise ValueError("Unknown DataType: %s" % str(band.DataType))
-
-    metadata = band.GetMetadata('IMAGE_STRUCTURE')
-    if 'PIXELTYPE' in metadata and metadata['PIXELTYPE'] == 'SIGNEDBYTE':
-        return numpy.int8
-    return numpy.uint8
-
-def get_nodata_from_uri(dataset_uri):
-    """
-    Returns the nodata value for the first band from a gdal dataset cast to its
-        correct numpy type.
-
-    Args:
-        dataset_uri (string): a uri to a gdal dataset
-
-    Returns:
-        nodata_cast: nodata value for dataset band 1
-
-    """
-
-    dataset = gdal.Open(dataset_uri)
-    band = dataset.GetRasterBand(1)
-    nodata = band.GetNoDataValue()
-    if nodata is not None:
-        nodata = _gdal_to_numpy_type(band)(nodata)
-    else:
-        pass
-
-    band = None
-    gdal.Dataset.__swig_destroy__(dataset)
-    dataset = None
-    return nodata
 
 def lookup(path_ds, path_out_ds, from_field='Value', to_field='', overwrite=True):
     """
@@ -295,44 +242,12 @@ def lookup(path_ds, path_out_ds, from_field='Value', to_field='', overwrite=True
 
     dict_reclass = dict(zip(val_from, val_to))
 
-    pygeoprocessing.reclassify_raster(path_ds,
+    ggeo.reclassify_raster(path_ds,
                                       dict_reclass,
                                       path_out_ds,
-                                      out_datatype=get_dataset_datatype(path_ds),
-                                      out_nodata=get_nodata_from_uri(path_ds))
+                                      out_datatype=ggeo.get_dataset_datatype(path_ds),
+                                      out_nodata=ggeo.get_nodata_from_uri(path_ds))
 
-def get_dataset_datatype(path_ds):
-    """
-    Return datatype of dataset e.g. GDT_UInt32
-    Args:
-        path_ds:
-
-    Returns:
-
-    """
-    dataset = gdal.Open(path_ds, gdalconst.GA_ReadOnly)
-
-    band = dataset.GetRasterBand(1)
-    bandtype = gdal.GetDataTypeName(band.DataType)  # UInt32
-
-    dataset = None  # Close dataset
-
-    if bandtype == 'UInt32':
-        return gdalconst.GDT_UInt32
-    elif bandtype == 'UInt16':
-        return gdalconst.GDT_UInt16
-    elif bandtype == 'Float32':
-        return gdalconst.GDT_Float32
-    elif bandtype == 'Float64':
-        return gdalconst.GDT_Float64
-    elif bandtype == 'Int16':
-        return gdalconst.GDT_Int16
-    elif bandtype == 'Int32':
-        return gdalconst.GDT_Int32
-    elif bandtype == 'Unknown':
-        return gdalconst.GDT_Unknown
-    else:
-        return gdalconst.GDT_UInt32
 
 def get_arr_res(lats, lons):
     """
@@ -661,7 +576,7 @@ def select(path_inp, name_col, val, path_out):
 
 
 def zonal_statistics(in_zone_data, zone_field, in_value_raster):
-    dict_zonal = pygeoprocessing.zonal_statistics(in_zone_data, in_value_raster, zone_field)
+    dict_zonal = ggeo.zonal_statistics(in_zone_data, in_value_raster, zone_field)
 
     return dict_zonal
 
