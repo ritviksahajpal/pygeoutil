@@ -474,6 +474,7 @@ def get_country_lat_lon_extent(country):
     #
     # 'mexico', 'south_africa', 'spain', 'australia', 'ukraine', 'uk_of_great_britain_and_northern_ireland',
     # 'germany','spain', 'kazakhstan', 'hungary', 'italy','indonesia'
+    pdb.set_trace()
     if country == 'united_states_of_america':
         return [-130, -60, 25, 48]
     elif country == 'russian_federation':
