@@ -521,6 +521,8 @@ def get_country_lat_lon_extent(country):
         return [100., 110., 8., 24.]
     elif country == 'kenya':
         return [33., 42.1, -5., 5.5]
+    elif country == 'mali':  # longitude(left) longitude(right), latitude (bottom), latitude(top)
+        return [9.8, 11.1, -6.5, -5.24]
     elif country == 'world':
         return [-180, 180, -60, 85]
     else:
