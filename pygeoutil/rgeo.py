@@ -12,7 +12,6 @@ import numpy as np
 import sys
 from cachetools import cached
 
-from . import ggeo
 from geopy.geocoders import Nominatim
 from shutil import copyfile
 import shapefile
