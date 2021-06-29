@@ -7,8 +7,6 @@ import json
 import subprocess
 
 import numpy
-import gdal
-import gdalconst
 import pandas as pd
 import numpy as np
 import sys
