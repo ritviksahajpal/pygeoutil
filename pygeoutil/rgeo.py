@@ -526,6 +526,8 @@ def get_country_lat_lon_extent(country):
         return [21.5, 34, -8, -18.5]
     elif country == 'malawi':  # longitude(left) longitude(right), latitude (bottom), latitude(top)
         return [32, 36, -9, -17]
+    elif country == 'uganda':  # longitude(left) longitude(right), latitude (bottom), latitude(top)
+        return [29, 36, -2, 5]
     elif country == 'world':
         return [-180, 180, -60, 85]
     else:
