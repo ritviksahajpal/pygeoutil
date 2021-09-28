@@ -479,7 +479,7 @@ def get_country_lat_lon_extent(country):
     elif country == 'china':
         return [70, 138, 12, 55]
     elif country == 'india':
-        return [64, 100, 4, 37]
+        return [68, 98, 8, 37]
     elif country == 'argentina':
         return [-74.0, -53., -59., -21.]
     elif country == 'brazil':
