@@ -480,6 +480,8 @@ def get_country_lat_lon_extent(country):
         return [70, 138, 12, 55]
     elif country == 'india':
         return [68, 98, 8, 36]
+    elif country == 'afghanistan':
+        return [60, 74, 31, 37]
     elif country == 'argentina':
         return [-74.0, -53., -59., -21.]
     elif country == 'brazil':
@@ -518,6 +520,8 @@ def get_country_lat_lon_extent(country):
         return [100., 110., 8., 24.]
     elif country == 'kenya':
         return [33., 42.1, -5., 5.5]
+    elif country == 'somalia':
+        return [40., 51, -2., 12]
     elif country == 'mali':  # longitude(left) longitude(right), latitude (bottom), latitude(top)
         return [-13, 5, 9, 26]
     elif country == 'united_republic_of_tanzania':  # longitude(left) longitude(right), latitude (bottom), latitude(top)
