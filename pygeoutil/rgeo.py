@@ -496,6 +496,8 @@ def get_country_lat_lon_extent(country):
         return [-5.5, 9.0, 41.0, 51.5]
     elif country == 'mexico':
         return [-120, -85, 15, 35]
+    elif country == 'namibia':
+        return [10, 26, -15, -30]
     elif country == 'south_africa':
         return [10, 35, -20, -35]
     elif country == 'ukraine':
