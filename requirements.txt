@@ -5,7 +5,7 @@ GDAL==2.1.2
 geopy==1.11.0
 matplotlib==2.0.0
 mock==2.0.0
-numpy==1.12.1
+numpy==1.21.0
 GDAL==2.1.2
 pandas==0.19.2
 PCSE==5.2.5
