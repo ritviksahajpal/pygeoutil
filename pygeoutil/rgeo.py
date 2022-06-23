@@ -537,7 +537,7 @@ def get_country_lat_lon_extent(country):
     elif country == 'uganda':  # longitude(left) longitude(right), latitude (bottom), latitude(top)
         return [29, 36, -2, 5]
     elif country == 'rwanda':  # longitude(left) longitude(right), latitude (bottom), latitude(top)
-        return [28, 31, -3, -1]
+        return [28, 31, -2.5, -1]
     elif country == 'world':
         return [-180, 180, -60, 85]
     else:
