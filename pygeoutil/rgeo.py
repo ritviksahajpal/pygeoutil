@@ -472,7 +472,7 @@ def get_country_lat_lon_extent(country):
     #
     # 'mexico', 'south_africa', 'spain', 'australia', 'ukraine', 'uk_of_great_britain_and_northern_ireland',
     # 'germany','spain', 'kazakhstan', 'hungary', 'italy','indonesia'
-
+    breakpoint()
     world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
 
     country = world[world.name == country]
