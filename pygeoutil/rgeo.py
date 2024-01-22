@@ -8,6 +8,7 @@ import subprocess
 
 import numpy
 import pandas as pd
+import geopandas as gpd
 import numpy as np
 import sys
 from cachetools import cached
@@ -471,6 +472,17 @@ def get_country_lat_lon_extent(country):
     #
     # 'mexico', 'south_africa', 'spain', 'australia', 'ukraine', 'uk_of_great_britain_and_northern_ireland',
     # 'germany','spain', 'kazakhstan', 'hungary', 'italy','indonesia'
+
+    world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
+
+    country = world[world.name == country]
+
+    if country.empty:
+        return [-180, 180, -60, 85]
+    else:
+        bbox = country.bounds.iloc[0]
+        return [bbox.minx, bbox.maxx, bbox.miny, bbox.maxy]
+
     if country == 'united_states_of_america':
         return [-130, -60, 25, 48]
     elif country == 'russian_federation':
