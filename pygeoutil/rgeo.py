@@ -460,7 +460,7 @@ def get_grid_cell_area(nrows, ncols):
     return cell_area
 
 
-def get_country_lat_lon_extent(country):
+def get_country_lat_lon_extent(country_names):
     """
     See https://data.humdata.org/dataset/bounding-boxes-for-countries/resource/aec5d77d-095a-4d42-8a13-5193ec18a6a9
     Args:
@@ -474,13 +474,34 @@ def get_country_lat_lon_extent(country):
     # 'germany','spain', 'kazakhstan', 'hungary', 'italy','indonesia'
     world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
 
-    country = world[world.name.str.lower().str.replace(" ", "_") == country]
+    # Initialize variables to store the extremes of the bounding box
+    minx, maxx, miny, maxy = 180, -180, 90, -90  # Start with extremes reversed
 
-    if country.empty:
-        return [-180, 180, -60, 85]
+    # Flag to check if at least one country is found
+    country_found = False
+
+    # Iterate over the list of country names
+    for country_name in country_names:
+        # Search for the country
+        country = world[world.name.str.lower().str.replace(" ", "_") == country_name]
+
+        # Proceed if the country is found
+        if not country.empty:
+            country_found = True  # At least one country is found
+            # Extract bounding box
+            bbox = country.bounds.iloc[0]
+            # Update the combined bounding box coordinates
+            minx = min(minx, bbox.minx)
+            maxx = max(maxx, bbox.maxx)
+            miny = min(miny, bbox.miny)
+            maxy = max(maxy, bbox.maxy)
+
+    # Return the combined bounding box if any country was found
+    if country_found:
+        return [minx, maxx, miny, maxy]
     else:
-        bbox = country.bounds.iloc[0]
-        return [bbox.minx, bbox.maxx, bbox.miny, bbox.maxy]
+        # Return a default global bounding box if no country was found
+        return [-180, 180, -90, 90]
 
     if country == 'united_states_of_america':
         return [-130, -60, 25, 48]
