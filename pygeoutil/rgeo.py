@@ -460,7 +460,7 @@ def get_grid_cell_area(nrows, ncols):
     return cell_area
 
 
-def get_country_lat_lon_extent(country_names):
+def get_country_lat_lon_extent(country_names, buffer=0.5):
     """
     See https://data.humdata.org/dataset/bounding-boxes-for-countries/resource/aec5d77d-095a-4d42-8a13-5193ec18a6a9
     Args:
@@ -498,7 +498,7 @@ def get_country_lat_lon_extent(country_names):
 
     # Return the combined bounding box if any country was found
     if country_found:
-        return [minx, maxx, miny, maxy]
+        return [minx - buffer, maxx + buffer, miny - buffer, maxy + buffer]
     else:
         # Return a default global bounding box if no country was found
         return [-180, 180, -90, 90]
