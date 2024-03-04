@@ -482,6 +482,13 @@ def get_country_lat_lon_extent(country_names, buffer=0.5):
 
     # Iterate over the list of country names
     for country_name in country_names:
+        if country == "dem_people's_rep_of_korea":
+            country = "north_korea"
+        elif country == "republic_of_korea":
+            country = "south_korea"
+        else:
+            pass
+
         # Search for the country
         country = world[world.name.str.lower().str.replace(" ", "_") == country_name]
 
