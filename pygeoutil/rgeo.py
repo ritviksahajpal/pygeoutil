@@ -482,6 +482,7 @@ def get_country_lat_lon_extent(country_names, buffer=0.5):
 
     # Iterate over the list of country names
     for country_name in country_names:
+        breakpoint()
         if country == "dem_people's_rep_of_korea":
             country = "north_korea"
         elif country == "republic_of_korea":
