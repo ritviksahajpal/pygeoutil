@@ -482,11 +482,11 @@ def get_country_lat_lon_extent(country_names, buffer=0.5):
 
     # Iterate over the list of country names
     for country_name in country_names:
-        if country == "dem_people's_rep_of_korea":
+        if country_name == "dem_people's_rep_of_korea":
             country = "north_korea"
-        elif country == "republic_of_korea":
+        elif country_name == "republic_of_korea":
             country = "south_korea"
-        elif country == "united_republic_of_tanzania":
+        elif country_name == "united_republic_of_tanzania":
             country = "tanzania"
         else:
             pass
