@@ -486,6 +486,8 @@ def get_country_lat_lon_extent(country_names, buffer=0.5):
             country = "north_korea"
         elif country == "republic_of_korea":
             country = "south_korea"
+        elif country == "united_republic_of_tanzania":
+            country = "tanzania"
         else:
             pass
 
