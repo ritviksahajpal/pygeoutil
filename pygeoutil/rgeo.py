@@ -472,7 +472,10 @@ def get_country_lat_lon_extent(country_names, buffer=0.5):
     #
     # 'mexico', 'south_africa', 'spain', 'australia', 'ukraine', 'uk_of_great_britain_and_northern_ireland',
     # 'germany','spain', 'kazakhstan', 'hungary', 'italy','indonesia'
-    world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
+    # world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
+    url = "https://naciscdn.org/naturalearth/110m/cultural/ne_110m_admin_0_countries.zip"
+
+    world = gpd.read_file(url)
 
     # Initialize variables to store the extremes of the bounding box
     minx, maxx, miny, maxy = 180, -180, 90, -90  # Start with extremes reversed
@@ -492,7 +495,7 @@ def get_country_lat_lon_extent(country_names, buffer=0.5):
             pass
 
         # Search for the country
-        country = world[world.name.str.lower().str.replace(" ", "_") == country_name]
+        country = world[world.ADMIN.str.lower().str.replace(" ", "_") == country_name]
 
         # Proceed if the country is found
         if not country.empty:
