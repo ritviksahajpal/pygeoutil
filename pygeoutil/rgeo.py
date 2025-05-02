@@ -475,13 +475,17 @@ def get_country_lat_lon_extent(country_names, buffer=0.5):
     # world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
     url = "https://naciscdn.org/naturalearth/110m/cultural/ne_110m_admin_0_countries.zip"
 
-    world = gpd.read_file(url)
+    world = gpd.read_file(url, engine="pyogrio")
 
     # Initialize variables to store the extremes of the bounding box
     minx, maxx, miny, maxy = 180, -180, 90, -90  # Start with extremes reversed
 
     # Flag to check if at least one country is found
     country_found = False
+
+    # Hack Russia is just way too long, selecting part that can be shown in map
+    if country_name in ["Russia", "Russian_Federation", "russia", "russian_federation"]:
+        return [20, 80, 40, 80]
 
     # Iterate over the list of country names
     for country_name in country_names:
