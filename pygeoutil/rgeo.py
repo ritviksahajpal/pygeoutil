@@ -107,7 +107,7 @@ def get_met(lat, lon, start_date=None, end_date=None):
 
     # Convert data to dataframe
     df = pd.DataFrame(columns=_header, data=[row.split() for row in _df])
-    df.replace('-', np.NaN, inplace=True)
+    df.replace('-', np.nan, inplace=True)
     df = pd.to_numeric(df.stack(), 'coerce').unstack()
     df['datetime'] = pd.to_datetime(df['YEAR'].astype(int), format='%Y') + pd.to_timedelta(df['DOY'] - 1, unit='d')
 

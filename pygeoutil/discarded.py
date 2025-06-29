@@ -3,7 +3,7 @@ import util
 
 import numpy as np
 
-def merge_nc_files(list_nc_files, path_out_nc, common_var_name='', mask_val=np.NaN, default_val=np.NaN,
+def merge_nc_files(list_nc_files, path_out_nc, common_var_name='', mask_val=np.nan, default_val=np.nan,
                    replace_var_by_file_name=False, normalize_arr=None):
     """
 
@@ -55,7 +55,7 @@ def merge_nc_files(list_nc_files, path_out_nc, common_var_name='', mask_val=np.N
                         if np.isnan(mask_val) and len(var.shape) >= 2:
                             #pdb.set_trace()
                             #if not np.isnan(default_val):
-                            #var[:].data[var[:].data == default_val] = np.NaN
+                            #var[:].data[var[:].data == default_val] = np.nan
                             var = var[:].filled(0.0)
                             if normalize_arr is not None:
                                 var = var[:] * normalize_arr

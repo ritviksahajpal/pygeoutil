@@ -308,7 +308,7 @@ def get_df_idx(df, freq='M'):
 ######################
 # numpy array ops
 ######################
-def replace_subset_arr(lats, lons, cell_size, subset_arr, default_val=np.NaN, _type='0'):
+def replace_subset_arr(lats, lons, cell_size, subset_arr, default_val=np.nan, _type='0'):
     """
 
     Args:
@@ -1169,7 +1169,7 @@ def get_vars_in_nc(path_nc, ignore_var=None):
     return list_vars
 
 
-def create_nc_var(hndl_nc, var, name_var, dims, fill_val=np.NaN):
+def create_nc_var(hndl_nc, var, name_var, dims, fill_val=np.nan):
     """
 
     Args:
