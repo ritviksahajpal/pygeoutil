@@ -483,10 +483,6 @@ def get_country_lat_lon_extent(country_names, buffer=0.5):
     # Flag to check if at least one country is found
     country_found = False
 
-    # Hack Russia is just way too long, selecting part that can be shown in map
-    if country_name in ["Russia", "Russian_Federation", "russia", "russian_federation"]:
-        return [20, 80, 40, 80]
-
     # Iterate over the list of country names
     for country_name in country_names:
         if country_name == "dem_people's_rep_of_korea":
@@ -512,6 +508,10 @@ def get_country_lat_lon_extent(country_names, buffer=0.5):
             miny = min(miny, bbox.miny)
             maxy = max(maxy, bbox.maxy)
 
+    # Hack Russia is just way too long, selecting part that can be shown in map
+    if country_name in ["Russia", "Russian_Federation", "russia", "russian_federation"]:
+        return [20, 80, 40, 80]
+        
     # Return the combined bounding box if any country was found
     if country_found:
         return [minx - buffer, maxx + buffer, miny - buffer, maxy + buffer]
