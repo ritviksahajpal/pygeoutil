@@ -475,6 +475,15 @@ def get_country_lat_lon_extent(country_names, buffer=0.5):
     # world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
     url = "https://naciscdn.org/naturalearth/110m/cultural/ne_110m_admin_0_countries.zip"
 
+    # Empty-list short-circuit. Callers can hand an empty list when
+    # every country name failed an upstream Natural Earth lookup (e.g.
+    # geocif passing a sub-country zone like Wolayita, an Ethiopian
+    # admin-2 zone, as a "country"). Returning the default global bbox
+    # here matches the country_found=False fallback at the bottom of
+    # the function — no special-case needed downstream.
+    if not country_names:
+        return [-180, 180, -90, 90]
+
     world = gpd.read_file(url, engine="pyogrio")
 
     # Initialize variables to store the extremes of the bounding box
@@ -485,6 +494,15 @@ def get_country_lat_lon_extent(country_names, buffer=0.5):
 
     # Iterate over the list of country names
     for country_name in country_names:
+        # Hack: Russia spans 180° of longitude so the full bbox isn't
+        # usable on a flat map. Hard-code the visible part. Lives
+        # INSIDE the loop because country_name is the loop variable —
+        # the prior placement outside the loop crashed with
+        # UnboundLocalError on an empty country_names list (the loop
+        # never ran, the variable was never bound).
+        if country_name in ["Russia", "Russian_Federation", "russia", "russian_federation"]:
+            return [20, 80, 40, 80]
+
         if country_name == "dem_people's_rep_of_korea":
             country = "north_korea"
         elif country_name == "republic_of_korea":
@@ -508,10 +526,6 @@ def get_country_lat_lon_extent(country_names, buffer=0.5):
             miny = min(miny, bbox.miny)
             maxy = max(maxy, bbox.maxy)
 
-    # Hack Russia is just way too long, selecting part that can be shown in map
-    if country_name in ["Russia", "Russian_Federation", "russia", "russian_federation"]:
-        return [20, 80, 40, 80]
-        
     # Return the combined bounding box if any country was found
     if country_found:
         return [minx - buffer, maxx + buffer, miny - buffer, maxy + buffer]
