@@ -10,7 +10,7 @@ GDAL==2.1.2
 pandas==0.19.2
 PCSE==5.2.5
 rasterio==1.0a3
-setuptools==29.0.1.post20161201
+setuptools==65.5.1
 scikit_image==0.11.3
 Sphinx==1.5.3
 statsmodels==0.6.1
